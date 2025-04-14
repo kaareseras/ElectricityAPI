@@ -7,6 +7,8 @@ from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from sqlmodel import Field, SQLModel, create_engine
 
+from src.fastapi_app.models import Restaurant, Review
+
 logger = logging.getLogger("app")
 logger.setLevel(logging.INFO)
 
@@ -18,7 +20,7 @@ if os.getenv("WEBSITE_HOSTNAME"):
         logger.info("Missing environment variable AZURE_POSTGRESQL_CONNECTIONSTRING")
     else:
         # Parse the connection string
-        details = dict(item.split('=') for item in env_connection_string.split())
+        details = dict(item.split("=") for item in env_connection_string.split())
 
         # Properly format the URL for SQLAlchemy
         sql_url = (
@@ -35,13 +37,16 @@ else:
     POSTGRES_DATABASE = os.environ.get("DBNAME")
     POSTGRES_PORT = os.environ.get("DBPORT", 5432)
 
-    sql_url = f"postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
+    sql_url = (
+        f"postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
+    )
 
 engine = create_engine(sql_url)
 
 
 def create_db_and_tables():
     return SQLModel.metadata.create_all(engine)
+
 
 class Restaurant(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
@@ -51,6 +56,7 @@ class Restaurant(SQLModel, table=True):
 
     def __str__(self):
         return f"{self.name}"
+
 
 class Review(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
