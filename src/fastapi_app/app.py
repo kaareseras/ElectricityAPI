@@ -11,7 +11,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.sql import func
 from sqlmodel import Session, select
 
-from .models import Restaurant, Review, engine
+from .config.database import get_db_session
+from .models import Restaurant, Review
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
@@ -30,12 +31,6 @@ templates.env.globals["prod"] = os.environ.get("RUNNING_IN_PRODUCTION", False)
 templates.env.globals["url_for"] = app.url_path_for
 
 
-# Dependency to get the database session
-def get_db_session():
-    with Session(engine) as session:
-        yield session
-
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request, session: Session = Depends(get_db_session)):
     logger.info("root called")
@@ -44,7 +39,7 @@ async def index(request: Request, session: Session = Depends(get_db_session)):
         .outerjoin(Review, Review.restaurant == Restaurant.id)
         .group_by(Restaurant.id)
     )
-    results = session.exec(statement).all()
+    results = session.execute(statement).all()
 
     restaurants = []
     for restaurant, avg_rating, review_count in results:
@@ -65,8 +60,11 @@ async def create_restaurant(request: Request):
 
 @app.post("/add", response_class=RedirectResponse)
 async def add_restaurant(
-    request: Request, restaurant_name: str = Form(...), street_address: str = Form(...), description: str = Form(...),
-    session: Session = Depends(get_db_session)
+    request: Request,
+    restaurant_name: str = Form(...),
+    street_address: str = Form(...),
+    description: str = Form(...),
+    session: Session = Depends(get_db_session),
 ):
     logger.info("name: %s address: %s description: %s", restaurant_name, street_address, description)
     restaurant = Restaurant()
@@ -82,14 +80,18 @@ async def add_restaurant(
 
 @app.get("/details/{id}", response_class=HTMLResponse)
 async def details(request: Request, id: int, session: Session = Depends(get_db_session)):
-    restaurant = session.exec(select(Restaurant).where(Restaurant.id == id)).first()
-    reviews = session.exec(select(Review).where(Review.restaurant == id)).all()
+    restaurant = session.query(Restaurant).filter(Restaurant.id == id).first()
+    # restaurant = session.execute(select(Restaurant).where(Restaurant.id == id)).first()
+    reviews = session.query(Review).filter(Review.restaurant == id).all()
+    # reviews = session.execute(select(Review).where(Review.restaurant == id)).all()
 
     review_count = len(reviews)
 
     avg_rating = 0
     if review_count > 0:
         avg_rating = sum(review.rating for review in reviews if review.rating is not None) / review_count
+
+    logger.info("avg_rating: %s review_count: %s", avg_rating, review_count)
 
     restaurant_dict = restaurant.dict()
     restaurant_dict["avg_rating"] = avg_rating
