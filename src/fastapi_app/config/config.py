@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     POSTGRES_DATABASE: str = os.environ.get("DBNAME")
     POSTGRES_PORT: int = os.environ.get("DBPORT", 5432)
 
+    DATABASE_URI: str = (
+        f"postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

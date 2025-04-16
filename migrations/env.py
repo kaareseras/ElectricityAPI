@@ -4,18 +4,17 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 # from src.fastapi_app.config.settings import get_settings
-from src.fastapi_app.config.database import Base, get_db_url
+from src.fastapi_app.config.config import get_settings
 
 # Import your models
 from src.fastapi_app.models import *
 
-# settings = get_settings()
-print(f"Database URL: {get_db_url()}")
+settings = get_settings()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", get_db_url())
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URI)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
