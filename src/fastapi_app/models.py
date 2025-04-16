@@ -1,33 +1,32 @@
 # import logging
 # import os
-import typing
-from datetime import datetime
 
 # from urllib.parse import quote_plus
 # from dotenv import load_dotenv
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.orm import relationship
+
+from src.fastapi_app.config.database import Base
 
 
-class Restaurant(SQLModel, table=True):
-    id: typing.Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(max_length=50)
-    street_address: str = Field(max_length=50)
-    description: str = Field(max_length=250)
+class Restaurant(Base):
+    __tablename__ = "restaurant"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(150), nullable=False)
+    street_address = Column(String(500))
+    description = Column(String(500))
+    reviews = relationship("Review", back_populates="restaurant", cascade="all, delete-orphan")
 
-    def __str__(self):
-        return f"{self.name}"
 
-
-class Review(SQLModel, table=True):
-    id: typing.Optional[int] = Field(default=None, primary_key=True)
-    restaurant: int = Field(foreign_key="restaurant.id")
-    user_name: str = Field(max_length=50)
-    rating: typing.Optional[int]
-    review_text: str = Field(max_length=500)
-    review_date: datetime
-
-    def __str__(self):
-        return f"{self.name}"
+class Review(Base):
+    __tablename__ = "review"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    restaurant_id = Column(Integer, ForeignKey("restaurant.id", ondelete="CASCADE"), nullable=False)
+    user_name = Column(String(50), nullable=False)
+    rating = Column(Integer)
+    review_text = Column(String(500))
+    review_date = Column(DateTime, default=func.now())
+    restaurant = relationship("Restaurant", back_populates="reviews")
 
 
 # from src.fastapi_app.models import Restaurant, Review

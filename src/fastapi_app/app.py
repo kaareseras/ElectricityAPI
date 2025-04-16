@@ -34,16 +34,31 @@ templates.env.globals["url_for"] = app.url_path_for
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request, session: Session = Depends(get_db_session)):
     logger.info("root called")
+    # statement = (
+    #     select(Restaurant, func.avg(Review.rating).label("avg_rating"), func.count(Review.id).label("review_count"))
+    #     .outerjoin(Review, Review.restaurant == Restaurant.id)
+    #     .group_by(Restaurant.id)
+    # )
+
+    # from sqlalchemy import select, func
+    # from your_model import Restaurant, Review
+
     statement = (
         select(Restaurant, func.avg(Review.rating).label("avg_rating"), func.count(Review.id).label("review_count"))
-        .outerjoin(Review, Review.restaurant == Restaurant.id)
+        .outerjoin(Review, Review.restaurant.has())
         .group_by(Restaurant.id)
     )
+
     results = session.execute(statement).all()
 
     restaurants = []
     for restaurant, avg_rating, review_count in results:
-        restaurant_dict = restaurant.dict()
+        restaurant_dict = {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "street_address": restaurant.street_address,
+            "description": restaurant.description,
+        }
         restaurant_dict["avg_rating"] = avg_rating
         restaurant_dict["review_count"] = review_count
         restaurant_dict["stars_percent"] = round((float(avg_rating) / 5.0) * 100) if review_count > 0 else 0
@@ -81,15 +96,13 @@ async def add_restaurant(
 @app.get("/details/{id}", response_class=HTMLResponse)
 async def details(request: Request, id: int, session: Session = Depends(get_db_session)):
     restaurant = session.query(Restaurant).filter(Restaurant.id == id).first()
-    reviews = session.query(Review).filter(Review.restaurant == id).all()
+    reviews = session.query(Review)
 
     review_count = len(reviews)
 
     avg_rating = 0
     if review_count > 0:
         avg_rating = sum(review.rating for review in reviews if review.rating is not None) / review_count
-
-    logger.info("avg_rating: %s review_count: %s", avg_rating, review_count)
 
     restaurant_dict = restaurant.dict()
     restaurant_dict["avg_rating"] = avg_rating

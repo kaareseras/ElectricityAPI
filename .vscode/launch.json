@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "fastapi_app:app",
+                "fastapi_app.app:app",
                 "--reload",
                 "--port=8888"
             ],
