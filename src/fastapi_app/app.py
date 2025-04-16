@@ -81,9 +81,7 @@ async def add_restaurant(
 @app.get("/details/{id}", response_class=HTMLResponse)
 async def details(request: Request, id: int, session: Session = Depends(get_db_session)):
     restaurant = session.query(Restaurant).filter(Restaurant.id == id).first()
-    # restaurant = session.execute(select(Restaurant).where(Restaurant.id == id)).first()
     reviews = session.query(Review).filter(Review.restaurant == id).all()
-    # reviews = session.execute(select(Review).where(Review.restaurant == id)).all()
 
     review_count = len(reviews)
 

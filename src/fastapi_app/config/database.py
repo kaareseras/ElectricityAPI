@@ -49,6 +49,14 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
 
+def get_db_url() -> str:
+    """Get the database URL."""
+    if settings.WEBSITE_HOSTNAME:
+        return settings.AZURE_POSTGRESQL_CONNECTIONSTRING
+    else:
+        return f"postgresql://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DATABASE}"
+
+
 def get_db_session() -> Generator:
     session = SessionLocal()
     try:
