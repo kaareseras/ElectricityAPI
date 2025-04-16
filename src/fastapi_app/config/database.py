@@ -52,7 +52,16 @@ Base = declarative_base()
 def get_db_url() -> str:
     """Get the database URL."""
     if settings.WEBSITE_HOSTNAME:
-        return settings.AZURE_POSTGRESQL_CONNECTIONSTRING
+        env_connection_string = settings.AZURE_POSTGRESQL_CONNECTIONSTRING
+        # Parse the connection string
+        details = dict(item.split("=") for item in env_connection_string.split())
+
+        # Properly format the URL for SQLAlchemy
+        sql_url = (
+            f"postgresql://{quote_plus(details['user'])}:{quote_plus(details['password'])}"
+            f"@{details['host']}:{details['port']}/{details['dbname']}?sslmode={details['sslmode']}"
+        )
+        return sql_url
     else:
         return f"postgresql://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DATABASE}"
 
