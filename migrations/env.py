@@ -1,6 +1,7 @@
 from logging.config import fileConfig
 
 from alembic import context
+from app.config.database import Base
 from sqlalchemy import engine_from_config, pool
 
 # from src.fastapi_app.config.settings import get_settings
