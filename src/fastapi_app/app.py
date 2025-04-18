@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from .config.database import get_db_session
-from .models import Restaurant, Review
+from .models.models import Restaurant, Review
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
