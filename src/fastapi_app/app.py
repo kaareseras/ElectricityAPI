@@ -23,7 +23,7 @@ if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 
 def create_application():
     application = FastAPI()
-    application.include_router(restaurent.restaurant_router)
+    application.include_router(Restaurant.restaurant_router)
 
     return application
 

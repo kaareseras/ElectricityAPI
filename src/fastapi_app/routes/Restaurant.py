@@ -15,8 +15,6 @@ templates = Jinja2Templates(directory="src/fastapi_app/templates")
 logger = logging.getLogger("restaurant_logger")
 logger.setLevel(logging.INFO)
 
-templates = Jinja2Templates(directory="src/fastapi_app/templates")
-
 
 restaurant_router = APIRouter(
     prefix="/restaurant",
