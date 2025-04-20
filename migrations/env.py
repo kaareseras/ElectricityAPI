@@ -3,12 +3,13 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# Import your models
-from fastapi_app.models.models import *
-
 # from src.fastapi_app.config.settings import get_settings
 from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.config.database import Base
+
+# Import your models
+from src.fastapi_app.models.models import *
+from src.fastapi_app.models.user import *
 
 settings = get_settings()
 
