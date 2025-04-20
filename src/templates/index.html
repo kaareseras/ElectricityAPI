@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Restaurant List{% endblock %}
+{% block title %}Link List{% endblock %}
 {% block head %}
     {{ super() }}
     <style>
@@ -41,34 +41,16 @@
   </style>
 {% endblock %}
 {% block content %}
-      <h1>Restaurants</h1>
+<table class="table">
+  <tbody>
 
-      {% if True %}
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th>Name</th>
-                      <th>Rating</th>
-                      <th class="text-end">Details</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  {% for restaurant in restaurants %}
-                      <tr>
-                          <td>{{ restaurant.name }}</td>
-                          <td>{% include "star_rating.html" %}</td>
-                          <td class="text-end"><a href="{{ url_for('details', id=restaurant.id) }}" class="btn btn-sm btn-primary">Details</a></td>
-                      </tr>
-                  {% endfor %}
-              </tbody>
-          </table>
-      {% else %}
-          <p>No restaurants exist.  Select Add new restaurant to add one.</p>
-      {% endif %}
+            <tr>
+              <td>Restaurents</td>
+              <td></td>
+              <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">go to restaurants</a></td>
+            </tr>
 
-
-      <div class="d-flex justify-content-end">
-              <a href="{{ url_for('create_restaurant') }}" class="btn btn-success px-4 gap-3">Add new restaurant</a>
-      </div>
+  </tbody>
+</table>
 
 {% endblock %}

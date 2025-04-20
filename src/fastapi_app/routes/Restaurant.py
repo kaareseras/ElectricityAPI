@@ -1,15 +1,19 @@
 import logging
+import pathlib
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from src.fastapi_app.config.database import get_db_session
 from src.fastapi_app.models.models import Restaurant, Review
 
-templates = Jinja2Templates(directory="src/fastapi_app/templates")
+parent_path = pathlib.Path(__file__).parent.parent.parent
+templates = Jinja2Templates(directory=parent_path / "templates")
 
 # Configure logger
 logger = logging.getLogger("restaurant_logger")
@@ -22,17 +26,41 @@ restaurant_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-restaurant_router.get("/create", response_class=HTMLResponse)
 
-
+@restaurant_router.get("/create", response_class=HTMLResponse)
 async def create_restaurant(request: Request):
     logger.info("Request for add restaurant page received")
-    return templates.TemplateResponse("create_restaurant.html", {"request": request})
+    return templates.TemplateResponse("restaurant/create_restaurant.html", {"request": request})
 
 
-restaurant_router.post("/add", response_class=RedirectResponse)
+@restaurant_router.get("/list", response_class=HTMLResponse)
+async def list(request: Request, session: Session = Depends(get_db_session)):
+    logger.info("root called")
+
+    statement = (
+        select(Restaurant, func.avg(Review.rating).label("avg_rating"), func.count(Review.id).label("review_count"))
+        .outerjoin(Review, Review.restaurant_id == Restaurant.id)
+        .group_by(Restaurant.id)
+    )
+    results = session.execute(statement).all()
+
+    restaurants = []
+    for restaurant_obj, avg_rating, review_count in results:
+        restaurant_dict = {
+            "id": restaurant_obj.id,
+            "name": restaurant_obj.name,
+            "street_address": restaurant_obj.street_address,
+            "description": restaurant_obj.description,
+        }
+        restaurant_dict["avg_rating"] = avg_rating
+        restaurant_dict["review_count"] = review_count
+        restaurant_dict["stars_percent"] = round((float(avg_rating) / 5.0) * 100) if review_count > 0 else 0
+        restaurants.append(restaurant_dict)
+
+    return templates.TemplateResponse("restaurant/list.html", {"request": request, "restaurants": restaurants})
 
 
+@restaurant_router.post("/add", response_class=RedirectResponse)
 async def add_restaurant(
     request: Request,
     restaurant_name: str = Form(...),
@@ -49,12 +77,10 @@ async def add_restaurant(
     session.commit()
     session.refresh(restaurant)
 
-    return RedirectResponse(url=f"/details/{restaurant.id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/restaurant/details/{restaurant.id}", status_code=status.HTTP_303_SEE_OTHER)
 
 
-restaurant_router.get("/details/{id}", response_class=HTMLResponse)
-
-
+@restaurant_router.get("/details/{id}", response_class=HTMLResponse)
 async def details(request: Request, id: int, session: Session = Depends(get_db_session)):
     restaurant = session.query(Restaurant).filter(Restaurant.id == id).first()
     reviews = session.query(Review).join(Review.restaurant).filter(Review.restaurant_id == id).all()
@@ -76,13 +102,11 @@ async def details(request: Request, id: int, session: Session = Depends(get_db_s
     restaurant_dict["stars_percent"] = round((float(avg_rating) / 5.0) * 100) if review_count > 0 else 0
 
     return templates.TemplateResponse(
-        "details.html", {"request": request, "restaurant": restaurant_dict, "reviews": reviews}
+        "restaurant/details.html", {"request": request, "restaurant": restaurant_dict, "reviews": reviews}
     )
 
 
-restaurant_router.post("/review/{id}", response_class=RedirectResponse)
-
-
+@restaurant_router.post("/review/{id}", response_class=RedirectResponse)
 async def add_review(
     request: Request,
     id: int,
@@ -100,4 +124,4 @@ async def add_review(
     session.add(review)
     session.commit()
 
-    return RedirectResponse(url=f"/details/{id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/restaurant/details/{id}", status_code=status.HTTP_303_SEE_OTHER)
