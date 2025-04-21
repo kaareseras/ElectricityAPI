@@ -1,0 +1,65 @@
+<!-- filepath: /workspace/src/templates/login_modal.html -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">Login</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="forgot-password-tab" data-bs-toggle="tab" href="#forgot-password" role="tab" aria-controls="forgot-password" aria-selected="false">Forgot Password</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="create-user-tab" data-bs-toggle="tab" href="#create-user" role="tab" aria-controls="create-user" aria-selected="false">Create User</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                        <form>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="forgot-password" role="tabpanel" aria-labelledby="forgot-password-tab">
+                        <form>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="create-user" role="tabpanel" aria-labelledby="create-user-tab">
+                        <form>
+                            <div class="mb-3">
+                                <label for="new-username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="new-username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new-password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="new-password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm-password" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirm-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create User</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

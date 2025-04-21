@@ -1,5 +1,5 @@
 import os
-from pathlib import Path
+import pathlib
 
 from fastapi.background import BackgroundTasks
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
@@ -12,14 +12,14 @@ conf = ConnectionConfig(
     MAIL_USERNAME=os.environ.get("MAIL_USERNAME", ""),
     MAIL_PASSWORD=os.environ.get("MAIL_PASSWORD", ""),
     MAIL_PORT=os.environ.get("MAIL_PORT", 1025),
-    MAIL_SERVER=os.environ.get("MAIL_SERVER", "smtp"),
+    MAIL_SERVER=os.environ.get("MAIL_SERVER", "192.168.1.179"),
     MAIL_STARTTLS=os.environ.get("MAIL_STARTTLS", False),
     MAIL_SSL_TLS=os.environ.get("MAIL_SSL_TLS", False),
     MAIL_DEBUG=False,
     MAIL_FROM=os.environ.get("MAIL_FROM", "noreply@test.com"),
     MAIL_FROM_NAME=os.environ.get("MAIL_FROM_NAME", settings.APP_NAME),
-    TEMPLATE_FOLDER=Path(__file__).parent.parent.parent / "templates",
-    USE_CREDENTIALS=os.environ.get("USE_CREDENTIALS", True),
+    TEMPLATE_FOLDER=pathlib.Path(__file__).parent.parent.parent / "templates",
+    USE_CREDENTIALS=os.environ.get("USE_CREDENTIALS", False),
 )
 
 fm = FastMail(conf)

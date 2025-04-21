@@ -36,21 +36,138 @@
         top: 0;
         left: 0;
         -webkit-text-stroke: initial;
-        /* overflow: hidden; */
       }
-  </style>
+    </style>
+    <script>
+      async function handleLogin(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('loginError');
+
+        try {
+            const response = await fetch('localhost:8888/auth/login', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              grant_type: 'password',
+              username: email,
+              password: password,
+              scope: '',
+              client_id: 'string',
+              client_secret: 'string',
+            }),
+            });
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById('loginModal').classList.remove('show');
+            document.querySelector('.modal-backdrop').remove();
+            document.body.classList.remove('modal-open');
+            document.body.style = '';
+            document.getElementById('usernameDisplay').innerText = `Welcome, ${data.username}`;
+          } else {
+            const errorData = await response.json();
+            errorDiv.innerText = errorData.message || 'Login failed. Please try again.';
+            errorDiv.style.display = 'block';
+          }
+        } catch (error) {
+          errorDiv.innerText = 'An error occurred. Please try again.';
+          errorDiv.style.display = 'block';
+        }
+      }
+    </script>
 {% endblock %}
 {% block content %}
+<!-- Button trigger for login modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+  Login
+</button>
 <table class="table">
   <tbody>
-
-            <tr>
-              <td>Restaurents</td>
-              <td></td>
-              <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">go to restaurants</a></td>
-            </tr>
-
+    <tr>
+      <td>Restaurants</td>
+      <td></td>
+      <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">Go to restaurants</a></td>
+    </tr>
   </tbody>
 </table>
+
+
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleLogin(event)">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" required>
+          </div>
+          <div id="loginError" class="text-danger" style="display: none;"></div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="forgotEmail" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="forgotEmail" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createUserModalLabel">Create User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="newEmail" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="newEmail" required>
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="newPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Create User</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
