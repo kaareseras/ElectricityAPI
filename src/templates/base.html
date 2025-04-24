@@ -141,6 +141,68 @@
     }
   };
 
+  // Function to handle the creation of a new user
+
+  async function CreateUser() {
+    event.preventDefault();
+    const newUsername = document.getElementById('newUsername').value;
+    const newEmail = document.getElementById('newEmail').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const retypePassword = document.getElementById('retypePassword').value;
+    const createUserMessage = document.getElementById('createUserMessage');
+
+    if (newPassword !== retypePassword) {
+      createUserMessage.classList.remove('text-success');
+      createUserMessage.classList.add('text-danger');
+      createUserMessage.innerText = 'Passwords do not match. Please try again.';
+      return;
+    }
+
+    try {
+      const response = await fetch('/users', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newUsername,
+          email: newEmail,
+          password: newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        // User created successfully
+        createUserMessage.classList.remove('text-danger');
+        createUserMessage.classList.add('text-success');
+        createUserMessage.innerText = 'User created successfully! A validation email has been sent.';
+
+        // Change the Create User button to a Close button
+        const createUserButton = document.querySelector('#createUserModal .btn-primary');
+        createUserButton.innerText = 'Close';
+        createUserButton.onclick = () => {
+          const createUserModal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+          if (createUserModal) {
+            createUserModal.hide();
+          }
+        };
+      } else {
+        // Handle error
+        createUserMessage.classList.remove('text-success');
+        createUserMessage.classList.add('text-danger');
+        const errorData = await response.json();
+        createUserMessage.innerText = errorData.detail || 'Error creating user. Please try again.';
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      createUserMessage.classList.remove('text-success');
+      createUserMessage.classList.add('text-danger');
+      createUserMessage.innerText = 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+
 
   // Function to redirect to the home page
   // This function is called when the "OK" button in the lockout modal is clicked
@@ -241,7 +303,8 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="lockoutModalLabel">Logged Out</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="redirectToHome()" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="redirectToHome()"
+              aria-label="Close"></button>
           </div>
         </div>
       </div>
@@ -281,7 +344,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form>
+            <form onsubmit="CreateUser(event)">
+              <div class="mb-3">
+                <label for="newUsername" class="form-label">Username</label>
+                <input type="text" class="form-control" id="newUsername" required>
+              </div>
               <div class="mb-3">
                 <label for="newEmail" class="form-label">Email address</label>
                 <input type="email" class="form-control" id="newEmail" required>
@@ -290,7 +357,12 @@
                 <label for="newPassword" class="form-label">Password</label>
                 <input type="password" class="form-control" id="newPassword" required>
               </div>
-              <button type="submit" class="btn btn-primary">Create User</button>
+              <div class="mb-3">
+                <label for="retypePassword" class="form-label">Retype Password</label>
+                <input type="password" class="form-control" id="retypePassword" required>
+              </div>
+              <div id="createUserMessage" class="mt-3"></div> <!-- Message container -->
+              <button type="submit" class="btn btn-primary" onclick="CreateUser()">Create User</button>
             </form>
           </div>
         </div>
