@@ -1,106 +1,310 @@
 <!-- filepath: /workspace/src/templates/base.html -->
+<script>
+  // Check if the user is logged in by verifying the presence of the token
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('accessToken');
+
+    if (token) {
+      // User is logged in, fetch user details
+      const username = await fetchuser(token);
+      setUIafterLoginLogout(username);
+    } else {
+      // User is not logged in, show home
+      setUIafterLoginLogout(null);
+    }
+  });
+
+  async function handleLogin() {
+
+    // Logic to handle user login
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    await login_save_token(); // Added await to handle the promise
+
+    token = localStorage.getItem('accessToken');
+
+    // Close the login modal after successful login
+    const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+    if (loginModal) {
+      loginModal.hide();
+    }
+
+    if (token) {
+      // User is logged in, fetch user details
+      username = await fetchuser(token);
+
+      setUIafterLoginLogout(username);
+    } else {
+      // User is not logged in, show home
+      setUIafterLoginLogout(null)
+    }
+  }
+
+  // Logout function to remove the token and reopen the login modal
+  function logout() {
+    localStorage.removeItem('accessToken');
+    setUIafterLoginLogout(null);
+    // Open the logout modal
+    const logoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
+    logoutModal.show();
+
+  }
+
+  async function fetchuser(token) {
+    userData = null; // Declare userData here
+    username = null; // Declare username here
+    try {
+      const userResponse = await fetch('/users/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json',
+        },
+      });
+
+
+      if (userResponse.ok) {
+        userData = await userResponse.json();
+        username = userData.name; // Ensure username is declared here
+      } else if (userResponse.status === 401) {
+        // Token expired, clear it and prompt login
+        alert('Session expired. Please log in again.');
+        localStorage.removeItem('accessToken');
+
+
+      } else {
+        console.error('Failed to fetch user details.');
+        return null;
+      }
+      return username;
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+
+
+  }
+
+  async function login_save_token() {
+
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+
+
+
+    try {
+      const response = await fetch('/auth/login', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'password',
+          username: email,
+          password: password,
+          scope: '',
+          client_id: 'string',
+          client_secret: 'string',
+        }),
+      });
+      // Handle response here
+
+      const logindata = await response.json();
+      localStorage.setItem('accessToken', logindata.access_token);
+    } catch (error) {
+      errorDiv.innerText = 'An error occurred. Please try again.';
+      errorDiv.style.display = 'block';
+    }
+  }
+
+  async function setUIafterLoginLogout(username) {
+
+    // Logic to update the UI after login/logout
+    const authNavItem = document.getElementById('authNavItem');
+
+    if (username) {
+      const displayName = username || 'User'; // Use provided username or fallback to 'User'
+      const usernameDisplay = document.getElementById('usernameDisplay'); // Added to define usernameDisplay
+      usernameDisplay.innerText = `Welcome, ${displayName}`; // Updated to use template literals
+      authNavItem.innerHTML = `
+              <a class="nav-link" href="#" onclick="logout()">Logout</a>
+          `;
+    } else {
+      usernameDisplay.innerText = '';
+      authNavItem.innerHTML = `
+              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
+          `;
+    }
+  };
+
+
+  // Function to redirect to the home page
+  // This function is called when the "OK" button in the lockout modal is clicked
+  function redirectToHome() {
+    window.location.href = '/';
+  }
+
+
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    {% block head %}
-        <title>FastAPI web app with PostgreSQL in Azure - {% block title %}{% endblock %}</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="shortcut icon" href="{{ url_for('static', path='favicon.ico') }}">
-        {% endblock %}
+  {% block head %}
+  <title>FastAPI web app with PostgreSQL in Azure - {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="shortcut icon" href="{{ url_for('static', path='favicon.ico') }}">
+  {% endblock %}
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
-        <div class="container">
-          <a class="navbar-brand" href="/">
-            <img src="{{ url_for('static', path='images/azure-icon.svg') }}" alt="" width="30" height="24" class="d-inline-block align-text-top">
-            Electricity prices
-          </a>
-          <div id="usernameDisplay" class="ms-auto"></div>
-          <div class="collapse navbar-collapse" id="navbarCollapse">                
-            <ul class="navbar-nav mb-2 mb-md-0 ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown07XL" data-bs-toggle="dropdown" aria-expanded="true">Azure Docs</a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdown07XL" data-bs-popper="none">
-                      <li><a class="dropdown-item" target="_blank" href="https://docs.microsoft.com/azure">Azure Docs Home</a></li>
-                      <li><a class="dropdown-item" target="_blank" href="#">Python Web App + Database Tutorial</a></li>
-                      <li><a class="dropdown-item" target="_blank" href="https://azure.microsoft.com/develop/python/">Python on Azure</a></li>
-                      <li><a class="dropdown-item" target="_blank" href="https://docs.microsoft.com/azure/developer/python">Python on Azure Developer Center</a></li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
-                </li>
+  <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="{{ url_for('static', path='images/azure-icon.svg') }}" alt="" width="30" height="24"
+          class="d-inline-block align-text-top">
+        Electricity prices
+      </a>
+      <div id="usernameDisplay" class="ms-auto"></div>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mb-2 mb-md-0 ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdown07XL" data-bs-toggle="dropdown"
+              aria-expanded="true">Azure Docs</a>
+            <ul class="dropdown-menu" aria-labelledby="dropdown07XL" data-bs-popper="none">
+              <li><a class="dropdown-item" target="_blank" href="https://docs.microsoft.com/azure">Azure Docs Home</a>
+              </li>
+              <li><a class="dropdown-item" target="_blank" href="#">Python Web App + Database Tutorial</a></li>
+              <li><a class="dropdown-item" target="_blank" href="https://azure.microsoft.com/develop/python/">Python on
+                  Azure</a></li>
+              <li><a class="dropdown-item" target="_blank"
+                  href="https://docs.microsoft.com/azure/developer/python">Python on Azure Developer Center</a></li>
             </ul>
+          </li>
+          <li class="nav-item" id="authNavItem">
+
+            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Login</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-        </div>
-      </nav>
-
-      <main class="container">    
-        {% block content %}{% endblock %}
-      </main>            
-
-      <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="loginModalLabel">Login</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">Login</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <a class="nav-link" id="forgot-password-tab" data-bs-toggle="tab" href="#forgot-password" role="tab" aria-controls="forgot-password" aria-selected="false">Forgot Password</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <a class="nav-link" id="create-user-tab" data-bs-toggle="tab" href="#create-user" role="tab" aria-controls="create-user" aria-selected="false">Create User</a>
-                </li>
-              </ul>
-              <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-                  <form>
-                    <div class="mb-3">
-                      <label for="username" class="form-label">Username</label>
-                      <input type="text" class="form-control" id="username" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="password" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                  </form>
-                </div>
-                <div class="tab-pane fade" id="forgot-password" role="tabpanel" aria-labelledby="forgot-password-tab">
-                  <form>
-                    <div class="mb-3">
-                      <label for="email" class="form-label">Email</label>
-                      <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
-                  </form>
-                </div>
-                <div class="tab-pane fade" id="create-user" role="tabpanel" aria-labelledby="create-user-tab">
-                  <form>
-                    <div class="mb-3">
-                      <label for="new-username" class="form-label">Username</label>
-                      <input type="text" class="form-control" id="new-username" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="new-password" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="new-password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create User</button>
-                  </form>
-                </div>
+          <div class="modal-body">
+            <form onsubmit="handleLogin(event)">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" required>
               </div>
-            </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+              <div id="loginError" class="text-danger" style="display: none;"></div>
+              <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div class="mt-3"></div>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot
+              Password?</a>
+            <br>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#createUserModal" data-bs-dismiss="modal">Create an
+              Account</a>
           </div>
         </div>
       </div>
+    </div>
+    </div>
 
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <!-- Lockout Modal -->
+    <div class="modal fade" id="lockoutModal" tabindex="-1" aria-labelledby="lockoutModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="lockoutModalLabel">Logged Out</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="redirectToHome()" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="forgotEmail" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="forgotEmail" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Reset Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createUserModalLabel">Create User</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="newEmail" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="newEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="newPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="newPassword" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Create User</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </main>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>
