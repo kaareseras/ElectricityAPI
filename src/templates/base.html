@@ -6,12 +6,17 @@
 
     if (token) {
       // User is logged in, fetch user details
-      const username = await fetchuser(token);
-      setUIafterLoginLogout(username);
+      const user = await fetchuser(token);
+      username = user.name; // Ensure username is declared here
+      is_admin = user.is_admin; // Ensure is_admin is declared here
+      setUIafterLoginLogout(username, is_admin);
     } else {
       // User is not logged in, show home
       setUIafterLoginLogout(null);
     }
+
+    document.getElementById('navbarCollapse').style.display = 'block';
+
   });
 
   async function handleLogin() {
@@ -32,28 +37,23 @@
 
     if (token) {
       // User is logged in, fetch user details
-      username = await fetchuser(token);
+      const user = await fetchuser(token);
+      const username = user.name; // Ensure username is declared here
+      const is_admin = user.is_admin; // Ensure is_admin is declared here
 
-      setUIafterLoginLogout(username);
+      setUIafterLoginLogout(username, is_admin);
     } else {
       // User is not logged in, show home
       setUIafterLoginLogout(null)
     }
   }
 
-  // Logout function to remove the token and reopen the login modal
-  function logout() {
-    localStorage.removeItem('accessToken');
-    setUIafterLoginLogout(null);
-    // Open the logout modal
-    const logoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
-    logoutModal.show();
 
-  }
 
   async function fetchuser(token) {
     userData = null; // Declare userData here
     username = null; // Declare username here
+    userId = null; // Declare userId here
     try {
       const userResponse = await fetch('/users/me', {
         method: 'GET',
@@ -67,6 +67,7 @@
       if (userResponse.ok) {
         userData = await userResponse.json();
         username = userData.name; // Ensure username is declared here
+        userid = userData.id; // Ensure userId is declared here
       } else if (userResponse.status === 401) {
         // Token expired, clear it and prompt login
         alert('Session expired. Please log in again.');
@@ -77,7 +78,7 @@
         console.error('Failed to fetch user details.');
         return null;
       }
-      return username;
+      return userData; // Return both username and userId
     } catch (error) {
       console.error('Error fetching user details:', error);
       return null;
@@ -121,19 +122,16 @@
     }
   }
 
-  async function setUIafterLoginLogout(username) {
+  async function setUIafterLoginLogout(username, admin = false) {
 
     // Logic to update the UI after login/logout
-    const authNavItem = document.getElementById('authNavItem');
+
 
     if (username) {
       const displayName = username || 'User'; // Use provided username or fallback to 'User'
       const usernameDisplay = document.getElementById('usernameDisplay'); // Added to define usernameDisplay
       usernameDisplay.innerText = `Welcome, ${displayName}`; // Updated to use template literals
-      // authNavItem.innerHTML = `
-      //         <a class="nav-link" href="#" onclick="logout()">Logout</a>
-      //     `;
-      // Hide SignUpbtn and SigninBtn
+      
       document.getElementById('SignUpbtn').style.display = 'none';
       document.getElementById('SigninBtn').style.display = 'none';
 
@@ -141,15 +139,18 @@
       document.getElementById('YourAccountBtn').style.display = 'block';
     } else {
       usernameDisplay.innerText = '';
-      // authNavItem.innerHTML = `
-      //         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
-      //     `;
-      // Show SignUpbtn and SigninBtn
       document.getElementById('SignUpbtn').style.display = 'block';
       document.getElementById('SigninBtn').style.display = 'block';
 
       // Hide YourAccountBtn
       document.getElementById('YourAccountBtn').style.display = 'none';
+    }
+
+    // Check if the user is an admin
+    if (admin) {
+      document.getElementById('AdminBtn').style.display = 'block';
+    } else {
+      document.getElementById('AdminBtn').style.display = 'none';
     }
   };
 
@@ -265,12 +266,6 @@
     }
   }
 
-
-  function redirectToHome() {
-    window.location.href = '/';
-  }
-
-
 </script>
 
 <!DOCTYPE html>
@@ -296,23 +291,27 @@
           class="d-inline-block align-text-top">
       </a>
       <div id="usernameDisplay" class="ms-auto"></div>
-      <div class="collapse navbar-collapse" id="navbarCollapse">
+      <div class="collapse navbar-collapse" id="navbarCollapse" style="display: none;">
         <ul class="navbar-nav mb-2 mb-md-0 ms-auto">
-          <li class="nav-item" id="SigninBtn">
-            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal" >
+          <li class="nav-item" id="SigninBtn" style="display: none;">
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
               <i class="fas fa-sign-in-alt"></i> Sign in
             </button>
           </li>
-          <li class="nav-item" id="SignUpbtn">
+          <li class="nav-item" id="SignUpbtn" style="display: none;">
             <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createUserModal">
               Sign up
             </button>
           </li>
-          <li class="nav-item" id="YourAccountBtn">
-            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Your account</a>
+          <li class="nav-item" id="AdminBtn" style="display: none;">
+            <a class="nav-link" href="admin/adminindex">Administration</a>
+          </li>
+          <li class="nav-item" id="YourAccountBtn" style="display: none;">
+            <a class="nav-link" href="users/detailspage">Your account</a>
           </li>
         </ul>
       </div>
+
     </div>
   </nav>
 
@@ -343,9 +342,7 @@
             <div class="mt-3"></div>
             <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot
               Password?</a>
-            <br>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#createUserModal" data-bs-dismiss="modal">Create an
-              Account</a>
+
           </div>
         </div>
       </div>

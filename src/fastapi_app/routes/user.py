@@ -1,13 +1,26 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, status
-from fastapi.responses import JSONResponse
+import pathlib
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request, status
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from src.fastapi_app.config.database import get_db_session
 from src.fastapi_app.config.security import get_current_user, oauth2_scheme
 from src.fastapi_app.responses.user import LoginResponse, UserResponse
-from src.fastapi_app.schemas.user import EmailRequest, RegisterUserRequest, ResetRequest, VerifyUserRequest
+from src.fastapi_app.schemas.user import (
+    EmailRequest,
+    RegisterUserRequest,
+    ResetRequest,
+    UpdateUserRequest,
+    VerifyUserRequest,
+)
 from src.fastapi_app.services import user
+
+parent_path = pathlib.Path(__file__).parent.parent.parent
+templates = Jinja2Templates(directory=parent_path / "templates")
+
 
 user_router = APIRouter(
     prefix="/users",
@@ -31,9 +44,21 @@ guest_router = APIRouter(
 
 @user_router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def register_user(
-    data: RegisterUserRequest, background_tasks: BackgroundTasks, session: Session = Depends(get_db_session)
+    data: RegisterUserRequest,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db_session),
 ):
     return await user.create_user_account(data, session, background_tasks)
+
+
+@user_router.post("/update", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+async def update_user(
+    data: UpdateUserRequest,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_user),
+):
+    return await user.update_user_account(data, session, background_tasks, current_user)
 
 
 @user_router.post("/verify", status_code=status.HTTP_200_OK)
@@ -76,3 +101,8 @@ async def fetch_user(user=Depends(get_current_user)):
 @auth_router.get("/{pk}", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def get_user_info(pk, session: Session = Depends(get_db_session)):
     return await user.fetch_user_detail(pk, session)
+
+
+@user_router.get("/detailspage", response_class=HTMLResponse)
+async def details(request: Request, session: Session = Depends(get_db_session)):
+    return templates.TemplateResponse("user/Useraccountsettings.html", {"request": request})

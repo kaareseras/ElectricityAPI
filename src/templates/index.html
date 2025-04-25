@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Link List{% endblock %}
+{% block title %}{% endblock %}
 {% block head %}
     {{ super() }}
     <style>
@@ -44,7 +44,17 @@
 {% endblock %}
 {% block content %}
 
+<table class="table">
+  <tbody>
 
+            <tr>
+              <td>Restaurents</td>
+              <td></td>
+              <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">go to restaurants</a></td>
+            </tr>
+
+  </tbody>
+</table>
 
 <div class="device-sale-picture">
   <div class="text-center">

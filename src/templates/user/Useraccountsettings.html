@@ -1,65 +1,169 @@
 {% extends "base.html" %}
-{% block title %}Link List{% endblock %}
+{% block title %}{% endblock %}
 {% block head %}
-    {{ super() }}
-    <style>
-      body {
-          min-height: 75rem;
-          padding-top: 4.5rem;
-      }
+{{ super() }}
+<style>
+  body {
+    min-height: 75rem;
+    padding-top: 4.5rem;
+  }
 
-      .score {
-        display: block;
-        font-size: 16px;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .score-wrap {
-        display: inline-block;
-        position: relative;
-        height: 19px;
-      }
-      
-      .score .stars-active {
-        color: #EEBD01;
-        position: relative;
-        z-index: 10;
-        display: inline-block;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      
-      .score .stars-inactive {
-        color: grey;
-        position: absolute;
-        top: 0;
-        left: 0;
-        -webkit-text-stroke: initial;
-      }
-    </style>
-    <script>
+  .score {
+    display: block;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+  }
 
-    </script>
+  .score-wrap {
+    display: inline-block;
+    position: relative;
+    height: 19px;
+  }
+
+  .score .stars-active {
+    color: #EEBD01;
+    position: relative;
+    z-index: 10;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .score .stars-inactive {
+    color: grey;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-text-stroke: initial;
+  }
+</style>
+<script>
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      const userData = await fetchme(token);
+      if (userData) {
+        document.getElementById('name').value = userData.name || '';
+        document.getElementById('email').value = userData.email || '';
+      }
+    } else {
+      alert('No access token found. Please log in.');
+    }
+  });
+
+  // Logout function to remove the token and reopen the login modal
+  function logout() {
+    localStorage.removeItem('accessToken');
+    setUIafterLoginLogout(null);
+    
+    alert('You have been logged out. Please log in again.');
+    window.location.href = '/'; // Redirect to login page
+
+  }
+
+
+  async function fetchme(token) {
+    userData = null; // Declare userData here
+    username = null; // Declare username here
+    userId = null; // Declare userId here
+    try {
+      const userResponse = await fetch('/users/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json',
+        },
+      });
+
+
+      if (userResponse.ok) {
+        userData = await userResponse.json();
+        username = userData.name; // Ensure username is declared here
+        userid = userData.id; // Ensure userId is declared here
+      } else if (userResponse.status === 401) {
+        // Token expired, clear it and prompt login
+        alert('Session expired. Please log in again.');
+        localStorage.removeItem('accessToken');
+
+
+      } else {
+        console.error('Failed to fetch user details.');
+        return null;
+      }
+      return userData; // Return both username and userId
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+
+
+  }
+
+
+    // Function to handle update user details
+    async function UpdateMe() {
+    event.preventDefault();
+    const token = localStorage.getItem('accessToken');
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const createUserMessage = document.getElementById('UserMessage');
+
+    try {
+      const response = await fetch('/users/update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+        }),
+      });
+
+      if (response.ok) {
+        // User updated successfully
+        const messageData = await response.json();
+        createUserMessage.classList.remove('text-danger');
+        createUserMessage.classList.add('text-success');
+        createUserMessage.innerText = messageData.detail || 'User updated successfully!';
+      } else {
+        // Handle error
+        createUserMessage.classList.remove('text-success');
+        createUserMessage.classList.add('text-danger');
+        const errorData = await response.json();
+        createUserMessage.innerText = errorData.detail || 'Error creating user. Please try again.';
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      createUserMessage.classList.remove('text-success');
+      createUserMessage.classList.add('text-danger');
+      createUserMessage.innerText = 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+</script>
 {% endblock %}
 {% block content %}
 
-<div class="container mt-4"></div>
+<div class="container mt-4" style="max-width: 600px;">
   <h2>Manage Your Account</h2>
-  <form method="post" action="{{ url_for('update_user_account') }}"></form>
-    <div class="mb-3">
-      <label for="name" class="form-label">Name</label>
-      <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
-    </div>
-    <div class="mb-3">
-      <label for="email" class="form-label">Email</label>
-      <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
-    </div>
-    <div class="mb-3">
-      <label for="password" class="form-label">Password</label>
-      <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password">
-    </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+  <form method="post" action="/users/update"></form>
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" class="form-control" id="name" name="name" value="" required>
+  </div>
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input type="email" class="form-control" id="email" name="email" value="" required>
+  </div>
+  <div id="UserMessage" class="text-danger" style="display: none;"></div>
+  <button class="btn btn-primary me-1" onclick="UpdateMe()">Save Changes</button>
+  <button class="btn btn-primary me-2">Reset Password</button>
+  <button class="btn btn-outline-secondary" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </form>
 </div>
 

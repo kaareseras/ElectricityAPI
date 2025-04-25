@@ -106,3 +106,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     if user:
         return user
     raise HTTPException(status_code=401, detail="Not authorised.")
+
+
+async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db_session)):
+    user = await get_token_user(token=token, db=db)
+    if user.is_admin is True:
+        return user
+    raise HTTPException(status_code=403, detail="Admin access required.")

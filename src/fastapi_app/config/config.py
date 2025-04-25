@@ -45,3 +45,8 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+@lru_cache
+def get_app_root():
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

@@ -11,6 +11,7 @@ class UserResponse(BaseResponse):
     name: str
     email: EmailStr
     is_active: bool
+    is_admin: bool
     created_at: Union[str, None, datetime] = None
 
 

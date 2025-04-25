@@ -50,6 +50,24 @@ async def create_user_account(data, session, background_tasks):
     return user
 
 
+async def update_user_account(data, session, background_tasks, current_user):
+    user = session.query(User).filter(User.id == current_user.id).first()
+
+    # Check if email has changed, if changed, invalidate current user and send verification email
+    if user.email != data.email:
+        await send_account_verification_email(user, background_tasks=background_tasks)
+        user.verified_at = None
+        user.is_active = False
+
+    user.name = data.name
+    user.email = data.email
+    user.updated_at = datetime.utcnow()
+    session.commit()
+    session.refresh(user)
+
+    return user
+
+
 async def activate_user_account(data, session, background_tasks):
     user = session.query(User).filter(User.email == data.email).first()
     if not user:
