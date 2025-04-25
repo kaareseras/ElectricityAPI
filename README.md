@@ -98,3 +98,8 @@ If you're working with this project and running into issues, please post in [Iss
 docker run -d --name mailpit -p 8025:8025 -p 1025:1025 -v mailpit-data:/data -e MP_MAX_MESSAGES=5000 -e MP_DATA_FILE=/data/mailpit.db -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit
 
 python3 -m uvicorn src.fastapi_app.app:app --reload --port=8000
+
+alembic revision --autogenerate -m 'create my table table'
+
+alembic upgrade head
+

@@ -130,19 +130,30 @@
       const displayName = username || 'User'; // Use provided username or fallback to 'User'
       const usernameDisplay = document.getElementById('usernameDisplay'); // Added to define usernameDisplay
       usernameDisplay.innerText = `Welcome, ${displayName}`; // Updated to use template literals
-      authNavItem.innerHTML = `
-              <a class="nav-link" href="#" onclick="logout()">Logout</a>
-          `;
+      // authNavItem.innerHTML = `
+      //         <a class="nav-link" href="#" onclick="logout()">Logout</a>
+      //     `;
+      // Hide SignUpbtn and SigninBtn
+      document.getElementById('SignUpbtn').style.display = 'none';
+      document.getElementById('SigninBtn').style.display = 'none';
+
+      // Show YourAccountBtn
+      document.getElementById('YourAccountBtn').style.display = 'block';
     } else {
       usernameDisplay.innerText = '';
-      authNavItem.innerHTML = `
-              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
-          `;
+      // authNavItem.innerHTML = `
+      //         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
+      //     `;
+      // Show SignUpbtn and SigninBtn
+      document.getElementById('SignUpbtn').style.display = 'block';
+      document.getElementById('SigninBtn').style.display = 'block';
+
+      // Hide YourAccountBtn
+      document.getElementById('YourAccountBtn').style.display = 'none';
     }
   };
 
   // Function to handle the creation of a new user
-
   async function CreateUser() {
     event.preventDefault();
     const newUsername = document.getElementById('newUsername').value;
@@ -202,10 +213,59 @@
     }
   }
 
+  async function handleForgotPassword(event) {
+    event.preventDefault();
+    const forgotEmail = document.getElementById('forgotEmail').value;
+    const forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+
+    try {
+      const response = await fetch('/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      if (response.ok) {
+        // Success: Display success message and change button to "Close"
+        forgotPasswordMessage.classList.remove('text-danger');
+        forgotPasswordMessage.classList.add('text-success');
+        forgotPasswordMessage.innerText = 'A password reset mail has been sent to the email address.';
+
+        const forgotPasswordButton = document.querySelector('#forgotPasswordModal .btn-primary');
+        forgotPasswordButton.innerText = 'Close';
+        forgotPasswordButton.onclick = () => {
+          const forgotPasswordModal = bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal'));
+          // Remove focus from the button
+          forgotPasswordButton.blur();
+          if (forgotPasswordModal) {
+            forgotPasswordModal.hide();
+            // Reset the form fields and message
+            document.getElementById('forgotEmail').value = '';
+            forgotPasswordMessage.innerText = '';
+            forgotPasswordMessage.classList.remove('text-success', 'text-danger');
+            forgotPasswordButton.innerText = 'Reset Password';
+            forgotPasswordButton.onclick = handleForgotPassword; // Corrected to assign the function reference  
+          }
+        };
+      } else {
+        // Error: Display error message
+        forgotPasswordMessage.classList.remove('text-success');
+        forgotPasswordMessage.classList.add('text-danger');
+        const errorData = await response.json();
+        forgotPasswordMessage.innerText = errorData.detail || 'Error sending password reset email. Please try again.';
+      }
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      forgotPasswordMessage.classList.remove('text-success');
+      forgotPasswordMessage.classList.add('text-danger');
+      forgotPasswordMessage.innerText = 'An unexpected error occurred. Please try again.';
+    }
+  }
 
 
-  // Function to redirect to the home page
-  // This function is called when the "OK" button in the lockout modal is clicked
   function redirectToHome() {
     window.location.href = '/';
   }
@@ -218,7 +278,7 @@
 
 <head>
   {% block head %}
-  <title>FastAPI web app with PostgreSQL in Azure - {% block title %}{% endblock %}</title>
+  <title>Powergy - {% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -232,29 +292,24 @@
   <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
     <div class="container">
       <a class="navbar-brand" href="/">
-        <img src="{{ url_for('static', path='images/azure-icon.svg') }}" alt="" width="30" height="24"
+        <img src="{{ url_for('static', path='images/powergy-icon.png') }}" alt="Powergy Logo" height="30"
           class="d-inline-block align-text-top">
-        Electricity prices
       </a>
       <div id="usernameDisplay" class="ms-auto"></div>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mb-2 mb-md-0 ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown07XL" data-bs-toggle="dropdown"
-              aria-expanded="true">Azure Docs</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdown07XL" data-bs-popper="none">
-              <li><a class="dropdown-item" target="_blank" href="https://docs.microsoft.com/azure">Azure Docs Home</a>
-              </li>
-              <li><a class="dropdown-item" target="_blank" href="#">Python Web App + Database Tutorial</a></li>
-              <li><a class="dropdown-item" target="_blank" href="https://azure.microsoft.com/develop/python/">Python on
-                  Azure</a></li>
-              <li><a class="dropdown-item" target="_blank"
-                  href="https://docs.microsoft.com/azure/developer/python">Python on Azure Developer Center</a></li>
-            </ul>
+          <li class="nav-item" id="SigninBtn">
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal" >
+              <i class="fas fa-sign-in-alt"></i> Sign in
+            </button>
           </li>
-          <li class="nav-item" id="authNavItem">
-
-            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login/Register</a>
+          <li class="nav-item" id="SignUpbtn">
+            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+              Sign up
+            </button>
+          </li>
+          <li class="nav-item" id="YourAccountBtn">
+            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Your account</a>
           </li>
         </ul>
       </div>
@@ -295,7 +350,6 @@
         </div>
       </div>
     </div>
-    </div>
 
     <!-- Lockout Modal -->
     <div class="modal fade" id="lockoutModal" tabindex="-1" aria-labelledby="lockoutModalLabel" aria-hidden="true">
@@ -310,8 +364,6 @@
       </div>
     </div>
 
-
-
     <!-- Forgot Password Modal -->
     <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel"
       aria-hidden="true">
@@ -322,11 +374,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form>
+            <form onsubmit="handleForgotPassword(event)">
               <div class="mb-3">
                 <label for="forgotEmail" class="form-label">Email address</label>
                 <input type="email" class="form-control" id="forgotEmail" required>
               </div>
+              <div id="forgotPasswordMessage" class="mt-3"></div> <!-- Message container -->
               <button type="submit" class="btn btn-primary">Reset Password</button>
             </form>
           </div>

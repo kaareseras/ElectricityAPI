@@ -160,6 +160,8 @@ def _generate_tokens(user, session):
 
 async def email_forgot_password_link(data, background_tasks, session):
     user = await load_user(data.email, session)
+    if not user:
+        return
     if not user.verified_at:
         raise HTTPException(
             status_code=400,
