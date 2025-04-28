@@ -16,7 +16,7 @@ parent_path = pathlib.Path(__file__).parent.parent.parent
 templates = Jinja2Templates(directory=parent_path / "templates")
 
 # Configure logger
-logger = logging.getLogger("restaurant_logger")
+logger = logging.getLogger("app")
 logger.setLevel(logging.INFO)
 
 
