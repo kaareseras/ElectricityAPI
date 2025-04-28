@@ -103,6 +103,6 @@ async def get_user_info(pk, session: Session = Depends(get_db_session)):
     return await user.fetch_user_detail(pk, session)
 
 
-@user_router.get("/detailspage", response_class=HTMLResponse)
+@user_router.get("/detailspage", response_class=HTMLResponse, name="users_detailspage")
 async def details(request: Request, session: Session = Depends(get_db_session)):
     return templates.TemplateResponse("user/Useraccountsettings.html", {"request": request})

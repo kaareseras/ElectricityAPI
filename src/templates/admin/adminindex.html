@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block head %}
+{{ super() }}
+<style>
+  body {
+    min-height: 75rem;
+    padding-top: 4.5rem;
+  }
+
+  .score {
+    display: block;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-wrap {
+    display: inline-block;
+    position: relative;
+    height: 19px;
+  }
+
+  .score .stars-active {
+    color: #EEBD01;
+    position: relative;
+    z-index: 10;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .score .stars-inactive {
+    color: grey;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-text-stroke: initial;
+  }
+</style>
+<script>
+
+</script>
+{% endblock %}
+{% block content %}
+
+<table class="table">
+  <tbody>
+
+    <tr>
+      <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">Users management</a></td>
+    </tr>
+    <tr>
+      <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">Device management</a></td>
+    </tr>
+    <tr>
+      <td class="text-end"><a href="{{ url_for('list') }}" class="btn btn-sm btn-primary">Cost management</a></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<div class="device-sale-picture">
+  <div class="text-center">
+    <img src="{{ url_for('static', path='images/Device_sale_picture.png') }}" alt=""
+      style="max-width: 100%; height: auto;" class="img-fluid">
+  </div>
+  <p class="text-center mt-2">Check out our latest device sale!</p>
+</div>
+
+
+
+
+
+{% endblock %}
