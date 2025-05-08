@@ -14,3 +14,8 @@ admin_router = APIRouter(prefix="/admin", tags=["Admin"], responses={404: {"desc
 @admin_router.get("", response_class=HTMLResponse, name="admin_index")
 async def details(request: Request):
     return templates.TemplateResponse("admin/adminindex.html", {"request": request})
+
+
+@admin_router.get("userlist", response_class=HTMLResponse, name="admin_user_list")
+async def user_list(request: Request):
+    return templates.TemplateResponse("admin/user/list.html", {"request": request})

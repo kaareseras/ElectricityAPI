@@ -4,6 +4,7 @@ import pathlib
 
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -24,6 +25,21 @@ def create_application():
     application.include_router(user.guest_router)
     application.include_router(user.auth_router)
     application.include_router(admin.admin_router)
+
+    # Tillad CORS for frontend (localhost:3000)
+    origins = [
+        "http://localhost:3000",  # Tillad anmodninger fra Vue-app på port 3000
+        # Du kan også tilføje flere domæner her, f.eks.:
+        # "http://localhost:8080",  # Hvis du har andre lokale apps
+    ]
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Kun disse domæner må tilgå API'et
+        allow_credentials=True,
+        allow_methods=["*"],  # Tillad alle HTTP-metoder (GET, POST, PUT, DELETE, etc.)
+        allow_headers=["*"],  # Tillad alle headers
+    )
 
     return application
 

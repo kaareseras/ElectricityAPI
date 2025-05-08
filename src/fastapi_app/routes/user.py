@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from src.fastapi_app.config.database import get_db_session
-from src.fastapi_app.config.security import get_current_user, oauth2_scheme
+from src.fastapi_app.config.security import get_current_admin, get_current_user, oauth2_scheme
 from src.fastapi_app.responses.user import LoginResponse, UserResponse
 from src.fastapi_app.schemas.user import (
     EmailRequest,
@@ -91,6 +91,11 @@ async def forgot_password(
 async def reset_password(data: ResetRequest, session: Session = Depends(get_db_session)):
     await user.reset_user_password(data, session)
     return JSONResponse({"message": "Your password has been updated."})
+
+
+@auth_router.get("", status_code=status.HTTP_200_OK, response_model=list[UserResponse])
+async def fetch_users(session: Session = Depends(get_db_session), admin=Depends(get_current_admin)):
+    return await user.fetch_all_users(session)
 
 
 @auth_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserResponse)

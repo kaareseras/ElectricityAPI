@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Restaurant List{% endblock %}
+{% block head %}
+{{ super() }}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  body {
+    min-height: 75rem;
+    padding-top: 4.5rem;
+  }
+
+</style>
+<script>
+
+
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    users = await fetchUsers();
+    createTableFromJSON(users);
+
+  });
+
+  async function fetchUsers() {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const users = await response.json();
+      return users;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
+  }
+
+
+  function createTableFromJSON(jsonData) {
+    let table = '<table class="table"><thead><tr>';
+    const headers = ['Email', 'Name', 'Active', 'Administrator','Created','Edit']; // Define headers explicitly
+    headers.forEach(header => table += `<th style="text-align: center; vertical-align: middle;">${header}</th>`);
+    table += '</tr></thead><tbody>';
+
+    jsonData.forEach(row => {
+      table += '<tr>';
+      table += `<td style="text-align: center; vertical-align: middle;">${row.email}</td>`;
+      table += `<td style="text-align: center; vertical-align: middle;">${row.name}</td>`;
+      table += `<td style="text-align: center; vertical-align: middle;"><input type="checkbox" ${row.is_active ? 'checked' : ''} disabled></td>`;
+      table += `<td style="text-align: center; vertical-align: middle;"><input type="checkbox" ${row.is_admin ? 'checked' : ''} disabled></td>`;
+      table += `<td style="text-align: center; vertical-align: middle;">${new Date(row.created_at).toLocaleDateString()}</td>`;
+      table += `<td class="text-center"><i class="bi bi-gear" style="cursor: pointer; color: gray;" onclick="window.location.href='/admin/user/${row.id}/edit'"></i></td>`;
+      table += '</tr>';
+    });
+
+    table += '</tbody></table>';
+    document.getElementById('table-container').innerHTML = table;
+  }
+
+
+
+
+
+</script>
+{% endblock %}
+{% block content %}
+<a href="/admin" class="btn btn-primary">
+  <i class="bi bi-arrow-left"></i> Admin dashboard
+</a>
+
+<br>
+
+<h1>Users</h1>
+
+<div id="table-container"></div>
+
+
+{% endblock %}

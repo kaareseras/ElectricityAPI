@@ -226,3 +226,22 @@ async def fetch_user_detail(pk, session):
     if user:
         return user
     raise HTTPException(status_code=400, detail="User does not exists.")
+
+
+async def fetch_all_users(session):
+    users = session.query(User).order_by(User.email.asc()).all()
+    if not users:
+        raise HTTPException(status_code=400, detail="No users found.")
+
+    user_responses = [
+        {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "is_active": user.is_active,
+            "is_admin": user.is_admin,
+            "created_at": user.created_at,
+        }
+        for user in users
+    ]
+    return user_responses
