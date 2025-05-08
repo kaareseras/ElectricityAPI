@@ -53,7 +53,7 @@ This project has a [dev container configuration](.devcontainer/), which makes it
 1. When you see the message `Your application running on port 8000 is available.`, click **Open in Browser**.
 
 ## Running locally
-
+do
 If you're running the app inside VS Code or GitHub Codespaces, you can use the "Run and Debug" button to start the app.
 
 ```sh
