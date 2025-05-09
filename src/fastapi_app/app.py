@@ -26,11 +26,10 @@ def create_application():
     application.include_router(user.auth_router)
     application.include_router(admin.admin_router)
 
-    # Tillad CORS for frontend (localhost:3000)
+    # Tillad CORS for Vue-app
     origins = [
         "http://localhost:3000",  # Tillad anmodninger fra Vue-app på port 3000
-        # Du kan også tilføje flere domæner her, f.eks.:
-        # "http://localhost:8080",  # Hvis du har andre lokale apps
+        "https://polite-rock-0dad32e03.6.azurestaticapps.net/",  # Azure Static Web App
     ]
 
     application.add_middleware(
