@@ -41,12 +41,13 @@ def create_application():
     )
 
     # 👇 Her indsætter du middleware til at logge 'Origin'-headeren
-    @application.middleware("http")
-    async def print_origin(request: Request, call_next):
-        origin = request.headers.get("origin")
-        print("Received Origin:", origin)
-        response = await call_next(request)
-        return response
+    # @application.middleware("http")
+
+    # async def print_origin(request: Request, call_next):
+    #     origin = request.headers.get("origin")
+    #     print("Received Origin:", origin)
+    #     response = await call_next(request)
+    #     return response
 
     return application
 
