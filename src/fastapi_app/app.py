@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from src.fastapi_app.routes import admin, restaurant, user
+from src.fastapi_app.routes import admin, user
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
@@ -19,7 +19,6 @@ if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 
 def create_application():
     application = FastAPI()
-    application.include_router(restaurant.restaurant_router)
     application.include_router(user.user_router)
     application.include_router(user.guest_router)
     application.include_router(user.auth_router)
