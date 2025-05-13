@@ -26,11 +26,13 @@ def create_application():
     application.include_router(admin.admin_router)
 
     # Tillad CORS for Vue-app
-    origins = [
-        "http://localhost:3000",  # Tillad anmodninger fra Vue-app på port 3000
-        "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
-        "*",  # Tillad alle domæner (kan være farligt i produktion)
-    ]
+    # origins = [
+    #     "http://localhost:3000",  # Tillad anmodninger fra Vue-app på port 3000
+    #     "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
+    #     "*",  # Tillad alle domæner (kan være farligt i produktion)
+    # ]
+
+    origins = []
 
     application.add_middleware(
         CORSMiddleware,
