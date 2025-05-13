@@ -29,6 +29,9 @@ jobs:
           python -m venv venv
           source venv/bin/activate
       
+      - name: Make entrypoint executable
+        run: chmod +x src/entrypoint.sh
+      
       - name: Install dependencies
         run: pip install -r requirements.txt
         

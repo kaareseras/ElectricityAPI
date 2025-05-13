@@ -4,6 +4,7 @@ import pathlib
 
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -25,21 +26,19 @@ def create_application():
     application.include_router(admin.admin_router)
 
     # Tillad CORS for Vue-app
-    # origins = [
-    #     "http://localhost:3000",  # Tillad anmodninger fra Vue-app på port 3000
-    #     "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
-    #     "*",  # Tillad alle domæner (kan være farligt i produktion)
-    # ]
+    origins = [
+        "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
+    ]
 
-    # origins = []
+    origins = []
 
-    # application.add_middleware(
-    #     CORSMiddleware,
-    #     allow_origins=origins,  # Kun disse domæner må tilgå API'et
-    #     allow_credentials=True,
-    #     allow_methods=["*"],  # Tillad alle HTTP-metoder (GET, POST, PUT, DELETE, etc.)
-    #     allow_headers=["*"],  # Tillad alle headers
-    # )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Kun disse domæner må tilgå API'et
+        allow_credentials=True,
+        allow_methods=["*"],  # Tillad alle HTTP-metoder (GET, POST, PUT, DELETE, etc.)
+        allow_headers=["*"],  # Tillad alle headers
+    )
 
     # 👇 Her indsætter du middleware til at logge 'Origin'-headeren
     # @application.middleware("http")
