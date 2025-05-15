@@ -228,6 +228,30 @@ async def fetch_user_detail(pk, session):
     raise HTTPException(status_code=400, detail="User does not exists.")
 
 
+async def delete_user_account(pk, session, current_user):
+    user = session.query(User).filter(User.id == pk).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if current_user.id == pk:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account.")
+
+    session.delete(user)
+    session.commit()
+    return user
+
+
+async def update_user_admin(pk, is_admin, session, current_user):
+    user = session.query(User).filter(User.id == pk).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if current_user.id == pk:
+        raise HTTPException(status_code=400, detail="You cannot update your own account.")
+
+    user.is_admin = is_admin
+    session.commit()
+    return user
+
+
 async def fetch_all_users(session):
     users = session.query(User).order_by(User.email.asc()).all()
     if not users:

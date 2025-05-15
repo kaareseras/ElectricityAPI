@@ -108,6 +108,25 @@ async def get_user_info(pk, session: Session = Depends(get_db_session)):
     return await user.fetch_user_detail(pk, session)
 
 
+@auth_router.delete("/{pk}", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def delete_user(
+    pk: int,
+    session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_admin),
+):
+    return await user.delete_user_account(pk, session, current_user)
+
+
+@auth_router.put("/admin/{pk}/{is_admin}", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def update_user_admin(
+    pk: int,
+    is_admin: bool,
+    session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_admin),
+):
+    return await user.update_user_admin(pk, is_admin, session, current_user)
+
+
 @user_router.get("/detailspage", response_class=HTMLResponse, name="users_detailspage")
 async def details(request: Request, session: Session = Depends(get_db_session)):
     return templates.TemplateResponse("user/Useraccountsettings.html", {"request": request})
