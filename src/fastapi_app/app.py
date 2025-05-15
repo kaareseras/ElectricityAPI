@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 
+import python_multipart  # noqa
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware

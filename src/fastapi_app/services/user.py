@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import joinedload
@@ -40,7 +40,7 @@ async def create_user_account(data, session, background_tasks):
     user.email = data.email
     user.password = hash_password(data.password)
     user.is_active = False
-    user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.now(UTC)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -61,7 +61,7 @@ async def update_user_account(data, session, background_tasks, current_user):
 
     user.name = data.name
     user.email = data.email
-    user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.now(UTC)
     session.commit()
     session.refresh(user)
 
@@ -83,8 +83,8 @@ async def activate_user_account(data, session, background_tasks):
         raise HTTPException(status_code=400, detail="This link either expired or not valid.")
 
     user.is_active = True
-    user.updated_at = datetime.utcnow()
-    user.verified_at = datetime.utcnow()
+    user.updated_at = datetime.now(UTC)
+    user.verified_at = datetime.now(UTC)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -134,14 +134,14 @@ async def get_refresh_token(refresh_token, session):
             UserToken.refresh_key == refresh_key,
             UserToken.access_key == access_key,
             UserToken.user_id == user_id,
-            UserToken.expires_at > datetime.utcnow(),
+            UserToken.expires_at > datetime.now(UTC),
         )
         .first()
     )
     if not user_token:
         raise HTTPException(status_code=400, detail="Invalid Request.")
 
-    user_token.expires_at = datetime.utcnow()
+    user_token.expires_at = datetime.now(UTC)
     session.add(user_token)
     session.commit()
     return _generate_tokens(user_token.user, session)
@@ -156,7 +156,7 @@ def _generate_tokens(user, session):
     user_token.user_id = user.id
     user_token.refresh_key = refresh_key
     user_token.access_key = access_key
-    user_token.expires_at = datetime.utcnow() + rt_expires
+    user_token.expires_at = datetime.now(UTC) + rt_expires
     session.add(user_token)
     session.commit()
     session.refresh(user_token)
@@ -214,7 +214,7 @@ async def reset_user_password(data, session):
         raise HTTPException(status_code=400, detail="Invalid window.")
 
     user.password = hash_password(data.password)
-    user.updated_at = datetime.now()
+    user.updated_at = datetime.now(UTC)
     session.add(user)
     session.commit()
     session.refresh(user)

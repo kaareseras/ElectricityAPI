@@ -1,6 +1,6 @@
 import base64
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi import Depends, HTTPException
@@ -65,7 +65,7 @@ def get_token_payload(token: str, secret: str, algo: str):
 
 
 def generate_token(payload: dict, secret: str, algo: str, expiry: timedelta):
-    expire = datetime.utcnow() + expiry
+    expire = datetime.now(UTC) + expiry
     payload.update({"exp": expire})
     return jwt.encode(payload, secret, algorithm=algo)
 
@@ -83,7 +83,7 @@ async def get_token_user(token: str, db):
                 UserToken.access_key == access_key,
                 UserToken.id == user_token_id,
                 UserToken.user_id == user_id,
-                UserToken.expires_at > datetime.utcnow(),
+                UserToken.expires_at > datetime.now(UTC),
             )
             .first()
         )
