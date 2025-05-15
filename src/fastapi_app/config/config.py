@@ -22,10 +22,10 @@ class Settings(BaseSettings):
     AZURE_POSTGRESQL_CONNECTIONSTRING: str = os.environ.get("AZURE_POSTGRESQL_CONNECTIONSTRING", "")
 
     # Postgres Database Config
-    POSTGRES_USERNAME: str = os.environ.get("DBUSER")
-    POSTGRES_PASSWORD: str = os.environ.get("DBPASS")
-    POSTGRES_HOST: str = os.environ.get("DBHOST")
-    POSTGRES_DATABASE: str = os.environ.get("DBNAME")
+    POSTGRES_USERNAME: str = os.environ.get("DBUSER", "username")
+    POSTGRES_PASSWORD: str = os.environ.get("DBPASS", "password")
+    POSTGRES_HOST: str = os.environ.get("DBHOST", "localhost")
+    POSTGRES_DATABASE: str = os.environ.get("DBNAME", "testdb")
     POSTGRES_PORT: int = os.environ.get("DBPORT", 5432)
 
     DATABASE_URI: str = (
