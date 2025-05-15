@@ -9,7 +9,7 @@ from src.fastapi_app.config.email import fm
 
 
 def test_user_can_send_forgot_password_request(client, user):
-    fm.config.SUPPRESS_SEND = 0
+    fm.config.SUPPRESS_SEND = 1
     data = {"email": user.email}
     response = client.post("/auth/forgot-password", json=data)
     assert response.status_code == 200
