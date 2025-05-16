@@ -1,0 +1,107 @@
+from datetime import datetime, timezone
+
+from fastapi import HTTPException
+from sqlalchemy import and_, or_
+
+from src.fastapi_app.config.config import get_settings
+from src.fastapi_app.models.tax import Tax
+from src.fastapi_app.responses.tax import TaxResponse
+
+settings = get_settings()
+
+
+async def fetch_tax_details(data, session):
+    tax = session.query(Tax).filter(Tax.id == data).first()
+    _error = ""
+    if not tax:
+        raise HTTPException(status_code=404, detail="Tax not found.")
+
+    my_tax = TaxResponse(
+        id=tax.id,
+        valid_from=tax.valid_from,
+        valid_to=tax.valid_to,
+        taxammount=tax.taxammount,
+        includingVAT=tax.includingVAT,
+        created_at=tax.created_at,
+        error=_error,
+    )
+
+    return my_tax
+
+
+async def fetch_tax_by_date(qdate, session):
+    tax = session.query(Tax).filter(and_(Tax.valid_from <= qdate, Tax.valid_to > qdate)).first()
+    _error = ""
+    if not tax:
+        raise HTTPException(status_code=404, detail="Tax not found.")
+
+    my_tax = TaxResponse(
+        id=tax.id,
+        valid_from=tax.valid_from,
+        valid_to=tax.valid_to,
+        taxammount=tax.taxammount,
+        includingVAT=tax.includingVAT,
+        created_at=tax.created_at,
+        error=_error,
+    )
+
+    return my_tax
+
+
+async def fetch_taxes(session):
+    taxes = session.query(Tax).all()
+    _error = ""
+    if not taxes:
+        raise HTTPException(status_code=404, detail="Tax not found.")
+
+    my_taxes = []
+    for tax in taxes:
+        my_tax = TaxResponse(
+            id=tax.id,
+            valid_from=tax.valid_from,
+            valid_to=tax.valid_to,
+            taxammount=tax.taxammount,
+            includingVAT=tax.includingVAT,
+            created_at=tax.created_at,
+            error=_error,
+        )
+        my_taxes.append(my_tax)
+
+    return my_taxes
+
+
+async def delete_tax(pk, session):
+    tax = session.query(Tax).filter(Tax.id == pk).first()
+    if not tax:
+        raise HTTPException(status_code=404, detail="Tax not found.")
+    session.delete(tax)
+    session.commit()
+    return {"message": "Tax deleted successfully."}
+
+
+async def add_tax(data, session):
+    existing_tax = (
+        session.query(Tax)
+        .filter(
+            or_(
+                and_(Tax.valid_from <= data.valid_from, Tax.valid_to > data.valid_from),
+                and_(Tax.valid_from < data.valid_to, Tax.valid_to >= data.valid_to),
+            )
+        )
+        .first()
+    )
+
+    if existing_tax:
+        raise HTTPException(status_code=404, detail="A tax already exists within the specified date range.")
+
+    tax = Tax()
+    tax.valid_from = data.valid_from
+    tax.valid_to = data.valid_to
+    tax.taxammount = data.taxammount
+    tax.includingVAT = data.includingVAT
+    tax.created_at = datetime.now(timezone.utc)
+    session.add(tax)
+    session.commit()
+    session.refresh(tax)
+
+    return await fetch_tax_details(tax.id, session)

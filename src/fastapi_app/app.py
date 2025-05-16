@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from src.fastapi_app.routes import admin, user
+from src.fastapi_app.routes import admin, charge, chargeowner, device, spotprice, tarif, tax, user
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
@@ -25,6 +25,12 @@ def create_application():
     application.include_router(user.guest_router)
     application.include_router(user.auth_router)
     application.include_router(admin.admin_router)
+    application.include_router(chargeowner.chargeowner_router)
+    application.include_router(charge.charge_router)
+    application.include_router(spotprice.spotprice_router)
+    application.include_router(tax.tax_router)
+    application.include_router(tarif.tarif_router)
+    application.include_router(device.device_router)
 
     # Tillad CORS for Vue-app
     origins = [
@@ -40,14 +46,6 @@ def create_application():
         allow_methods=["*"],  # Tillad alle HTTP-metoder (GET, POST, PUT, DELETE, etc.)
         allow_headers=["*"],  # Tillad alle headers
     )
-
-    # 👇 Her indsætter du middleware til at logge 'Origin'-headeren
-    # @application.middleware("http")
-    # async def print_origin(request: Request, call_next):
-    #     origin = request.headers.get("origin")
-    #     print("Received Origin:", origin)
-    #     response = await call_next(request)
-    #     return response
 
     return application
 
