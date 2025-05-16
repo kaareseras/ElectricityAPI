@@ -60,13 +60,16 @@ async def delete_device(uuid, session):
 
 
 async def add_device(data, session):
-    try:
-        device = Device(uuid=data.uuid, last_activity=datetime.now(timezone.utc), created_at=datetime.now(timezone.utc))
-        session.add(device)
-        session.commit()
-        session.refresh(device)
-    except Exception:
-        raise HTTPException(status_code=404, detail="Device not added.")
+    # Check if the device already exists
+    existing = session.get(Device, data.uuid)
+    if existing:
+        raise HTTPException(status_code=404, detail="Device already exists.")
+
+    # Add new device
+    device = Device(uuid=data.uuid, last_activity=datetime.now(timezone.utc), created_at=datetime.now(timezone.utc))
+    session.add(device)
+    session.commit()
+    session.refresh(device)
 
     return await fetch_device_details(device.uuid, session)
 
@@ -177,8 +180,8 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
                 hour=row["HourDK"],
                 totalprice=row["TotalPrice"],
                 spotprice=row["SpotPrice"],
-                isMax=row["TotalPrice"] == df["TotalPrice"].max(),
-                isMin=row["TotalPrice"] == df["TotalPrice"].min(),
+                isMax=bool(row["TotalPrice"] == df["TotalPrice"].max()),
+                isMin=bool(row["TotalPrice"] == df["TotalPrice"].min()),
             )
         )
 
