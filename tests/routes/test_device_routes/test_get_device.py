@@ -37,6 +37,10 @@ def test_fetch_all_devices(client, device, device2, user, test_session):
     assert response.status_code == 200
     assert len(response.json()) == 2
 
+    for dev in response.json():
+        assert dev.get("name") is not None
+        assert dev.get("user_id") is not None
+
 
 # Test for fetching device with an invalid ID
 

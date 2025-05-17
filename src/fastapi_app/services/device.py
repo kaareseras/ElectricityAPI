@@ -43,6 +43,8 @@ async def fetch_devices(session, user):
     return [
         {
             "uuid": device.uuid,
+            "user_id": device.user_id,
+            "name": device.name,
             "chargeowner_id": device.chargeowner_id,
             "PriceArea": device.PriceArea,
             "Config": device.Config,
