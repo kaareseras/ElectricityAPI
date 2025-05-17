@@ -12,12 +12,16 @@ def test_add_device(client, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
-    new_device = {"uuid": "123e4567-e89b-12d3-a456-426614174000"}
+    uuid = "123e4567-e89b-12d3-a456-426614174000"
+
+    new_device = {"uuid": uuid}
 
     response = client.post("/device/", headers=headers, json=new_device)
 
     assert response.status_code == 200
-    assert response.json()["uuid"] is not None
+    assert response.json()["uuid"] == uuid
+    assert response.json()["name"] == uuid
+    assert response.json()["user_id"] == user.id
 
 
 def test_add_device_with_existing_uuid(client, device, user, test_session):
