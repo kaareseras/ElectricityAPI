@@ -16,6 +16,7 @@ def test_update_device(client, device, user, test_session):
 
     updated_device = {
         "uuid": device.uuid,
+        "name": "Updated Device Name",
         "chargeowner_id": device.chargeowner_id,
         "PriceArea": "DK2",
         "Config": '{"setting": "new_value"}',

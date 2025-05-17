@@ -6,6 +6,8 @@ from src.fastapi_app.responses.base import BaseResponse
 
 class DeviceResponse(BaseResponse):
     uuid: str
+    name: Union[str, None] = None
+    user_id: Union[int, None] = None
     chargeowner_id: Union[int, None] = None
     PriceArea: Union[str, None] = None
     Config: Union[str, None] = None

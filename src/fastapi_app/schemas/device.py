@@ -7,6 +7,7 @@ class AddDeviceRequest(BaseModel):
 
 class UpdateDeviceRequest(BaseModel):
     uuid: str
+    name: str | None
     chargeowner_id: int | None
     PriceArea: str | None
     Config: str | None

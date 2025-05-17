@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -18,13 +18,15 @@ from src.fastapi_app.services.tax import fetch_tax_by_date
 settings = get_settings()
 
 
-async def fetch_device_details(uuid, session):
-    device = session.query(Device).filter(Device.uuid == uuid).first()
+async def fetch_device_details(uuid, session, user):
+    device = session.query(Device).filter(Device.uuid == uuid and Device.user_id == user.id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found.")
 
     return {
         "uuid": device.uuid,
+        "user_id": device.user_id,
+        "name": device.name,
         "chargeowner_id": device.chargeowner_id,
         "PriceArea": device.PriceArea,
         "Config": device.Config,
@@ -33,8 +35,8 @@ async def fetch_device_details(uuid, session):
     }
 
 
-async def fetch_devices(session):
-    devices = session.query(Device).all()
+async def fetch_devices(session, user):
+    devices = session.query(Device).filter(Device.user_id == user.id).all()
     if not devices:
         raise HTTPException(status_code=404, detail="No devices found.")
 
@@ -51,8 +53,8 @@ async def fetch_devices(session):
     ]
 
 
-async def delete_device(uuid, session):
-    device = session.query(Device).filter(Device.uuid == uuid).first()
+async def delete_device(uuid, session, user):
+    device = session.query(Device).filter(Device.uuid == uuid and Device.user_id == user.id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found.")
 
@@ -61,40 +63,43 @@ async def delete_device(uuid, session):
     return {"message": "Device deleted successfully."}
 
 
-async def add_device(data, session):
+async def add_device(data, session, user):
     # Check if the device already exists
     existing = session.get(Device, data.uuid)
     if existing:
         raise HTTPException(status_code=404, detail="Device already exists.")
 
     # Add new device
-    device = Device(uuid=data.uuid, last_activity=datetime.now(timezone.utc), created_at=datetime.now(timezone.utc))
+    device = Device(
+        uuid=data.uuid, name=data.uuid, user_id=user.id, last_activity=datetime.now(UTC), created_at=datetime.now(UTC)
+    )
     session.add(device)
     session.commit()
     session.refresh(device)
 
-    return await fetch_device_details(device.uuid, session)
+    return await fetch_device_details(device.uuid, session, user)
 
 
-async def update_device(device_uuid, data, session):
-    device = session.query(Device).filter(Device.uuid == device_uuid).first()
+async def update_device(device_uuid, data, session, user):
+    device = session.query(Device).filter(Device.uuid == device_uuid and Device.user_id == user.id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found.")
 
     device.uuid = data.uuid
+    device.name = data.name
     device.chargeowner_id = data.chargeowner_id
     device.PriceArea = data.PriceArea
     device.Config = data.Config
-    device.last_activity = datetime.now(timezone.utc)
-    device.updated_at = datetime.now(timezone.utc)
+    device.last_activity = datetime.now(UTC)
+    device.updated_at = datetime.now(UTC)
 
     session.commit()
     session.refresh(device)
 
-    return await fetch_device_details(device.uuid, session)
+    return await fetch_device_details(device.uuid, session, user)
 
 
-async def fetch_device_dayprice(uuid: str, qdate: Date, session):
+async def fetch_device_dayprice(uuid: str, qdate: Date, session, user):
     # Set Danish timezone
     tz = ZoneInfo("Europe/Copenhagen")
 
@@ -109,7 +114,7 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     hour_range = pd.date_range(start=start.date(), periods=24, freq="h")
 
     # Fetch device and related data
-    device = await fetch_device_details(uuid, session)
+    device = await fetch_device_details(uuid, session, user)
     chargeowner = await fetch_chargeowner_details(device["chargeowner_id"], session)
     spotprices = await fetch_spotprices_for_date(session, qdate, device["PriceArea"])
     tax = await fetch_tax_by_date(qdate, session)

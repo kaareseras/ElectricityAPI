@@ -1,0 +1,2 @@
+Enable usernames with ÆØÅ chars
+Make email not case sensitive in login

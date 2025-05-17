@@ -456,9 +456,11 @@ def oldtarif(test_session):
 
 @freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
-def device(test_session, chargeowner):
+def device(test_session, chargeowner, user):
     model = Device()
     model.uuid = "ABC123"
+    model.user_id = user.id
+    model.name = "Test Device"
     model.chargeowner_id = chargeowner.id
     model.PriceArea = "DK2"
     model.Config = '{"setting1": "value1", "setting2": "value2"}'
@@ -472,9 +474,11 @@ def device(test_session, chargeowner):
 
 @freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
-def device2(test_session, chargeowner):
+def device2(test_session, chargeowner, user):
     model = Device()
     model.uuid = "1234567890"
+    model.user_id = user.id
+    model.name = "Test Device 2"
     model.chargeowner_id = chargeowner.id
     model.PriceArea = "DK2"
     model.Config = '{"setting1": "value1", "setting2": "value2"}'
