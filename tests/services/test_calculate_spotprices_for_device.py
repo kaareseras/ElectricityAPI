@@ -2,11 +2,13 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import pytest
+from freezegun import freeze_time
 
 from src.fastapi_app.responses.dayprice import hourPrice
 from src.fastapi_app.services.device import fetch_device_dayprice  # Import the missing function
 
 
+@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.mark.asyncio
 async def test_fetch_device_dayprice_structure(
     client, device, spotprices_for_all_day, tax, tarif, charge, chargeowner, user, test_session
@@ -27,6 +29,8 @@ async def test_fetch_device_dayprice_structure(
     # Check isMax / isMin appear only once
     is_max_list = [p.isMax for p in prices]
     is_min_list = [p.isMin for p in prices]
+
+    print(prices)
 
     assert sum(is_max_list) == 1, "Should only have one isMax=True"
     assert sum(is_min_list) == 1, "Should only have one isMin=True"

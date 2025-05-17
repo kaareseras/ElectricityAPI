@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
-from sqlalchemy import Date, and_
+from sqlalchemy import Date
+from sqlmodel import func
 
 from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.models.spotprice import Spotprice
@@ -108,12 +109,15 @@ async def fetch_spotprices(session):
 
 
 async def fetch_spotprices_for_date(session, qdate: Date, pricearea: str):
-    if qdate == None:
+    if qdate is None:
         copenhagen_tz = ZoneInfo("Europe/Copenhagen")
         qdate = datetime.now(copenhagen_tz).replace(hour=0, minute=0, second=0, microsecond=0)
 
+    if isinstance(qdate, datetime):
+        qdate = qdate.date()
+
     spotprices = (
-        session.query(Spotprice).filter(and_(Spotprice.DateDK == qdate.date(), Spotprice.PriceArea == pricearea)).all()
+        session.query(Spotprice).filter(func.date(Spotprice.DateDK) == qdate, Spotprice.PriceArea == pricearea).all()
     )
 
     if not spotprices:

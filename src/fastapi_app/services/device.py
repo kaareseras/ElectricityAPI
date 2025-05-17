@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from fastapi import HTTPException
+from pandas import Timestamp
 from sqlalchemy import Date
 
 from src.fastapi_app.config.config import get_settings
@@ -93,98 +95,97 @@ async def update_device(device_uuid, data, session):
 
 
 async def fetch_device_dayprice(uuid: str, qdate: Date, session):
-    # Fetch the device details
+    # Set Danish timezone
+    tz = ZoneInfo("Europe/Copenhagen")
 
+    # Ensure the qdate is a timezone-aware Timestamp in Europe/Copenhagen
+    ts = Timestamp(qdate)
+    if ts.tzinfo is None:
+        start = ts.tz_localize(tz)
+    else:
+        start = ts.tz_convert(tz)
+
+    # Create hourly range for the date
+    hour_range = pd.date_range(start=start.date(), periods=24, freq="h")
+
+    # Fetch device and related data
     device = await fetch_device_details(uuid, session)
-
     chargeowner = await fetch_chargeowner_details(device["chargeowner_id"], session)
-
-    # Fetch the spot prices for the specified date and price area
-
     spotprices = await fetch_spotprices_for_date(session, qdate, device["PriceArea"])
-
-    # Fetch the tax and tarif data for the specified date
-
     tax = await fetch_tax_by_date(qdate, session)
-
     tarif = await fetch_tarif_by_date(qdate, session)
-
     charge = await fetch_charges_for_date_and_gln(session, qdate, chargeowner.glnnumber)
 
-    # Create a DataFrame with a column 'HourDK' containing hourly timestamps starting from the current day
-    df = pd.DataFrame({"HourDK": pd.date_range(start=qdate, periods=24, freq="h")})
+    # Build initial DataFrame
+    df = pd.DataFrame({"HourDK": hour_range})
 
-    # Create a DataFrame from the spot prices
+    # Create DataFrame from spot prices
     spotprice_df = pd.DataFrame([{"HourDK": sp.HourDK, "SpotPrice": sp.SpotpriceDKK} for sp in spotprices])
 
-    # Merge the spot price DataFrame with the existing DataFrame on the 'Hour' column
+    # Ensure HourDK is timezone-aware and in correct tz
+    spotprice_df["HourDK"] = pd.to_datetime(spotprice_df["HourDK"])
+
+    # Merge with spot prices
     df = df.merge(spotprice_df, on="HourDK", how="left")
 
-    # Create a DataFrame from the charge model
-    charge_data = {
-        "HourDK": pd.date_range(start=qdate, periods=24, freq="h"),
-        "Charge": [
-            charge.price1,
-            charge.price2,
-            charge.price3,
-            charge.price4,
-            charge.price5,
-            charge.price6,
-            charge.price7,
-            charge.price8,
-            charge.price9,
-            charge.price10,
-            charge.price11,
-            charge.price12,
-            charge.price13,
-            charge.price14,
-            charge.price15,
-            charge.price16,
-            charge.price17,
-            charge.price18,
-            charge.price19,
-            charge.price20,
-            charge.price21,
-            charge.price22,
-            charge.price23,
-            charge.price24,
-        ],
-    }
+    # Create charge DataFrame using same hour_range
+    charge_df = pd.DataFrame(
+        {
+            "HourDK": hour_range,
+            "Charge": [
+                charge.price1,
+                charge.price2,
+                charge.price3,
+                charge.price4,
+                charge.price5,
+                charge.price6,
+                charge.price7,
+                charge.price8,
+                charge.price9,
+                charge.price10,
+                charge.price11,
+                charge.price12,
+                charge.price13,
+                charge.price14,
+                charge.price15,
+                charge.price16,
+                charge.price17,
+                charge.price18,
+                charge.price19,
+                charge.price20,
+                charge.price21,
+                charge.price22,
+                charge.price23,
+                charge.price24,
+            ],
+        }
+    )
 
-    charge_df = pd.DataFrame(charge_data)
-
-    # Merge the charge DataFrame with the existing DataFrame on the 'HourDK' column
+    # Merge with charge data
     df = df.merge(charge_df, on="HourDK", how="left")
 
-    # Add the tax and tarif data with the existing DataFrame
-    if not tax.includingVAT:
-        tax.taxammount = tax.taxammount * 1.25
-    df["Tax"] = tax.taxammount
+    # Add tax and tarif (applying VAT if needed)
+    df["Tax"] = tax.taxammount * (1.25 if not tax.includingVAT else 1)
+    df["NetTarif"] = tarif.nettarif * (1.25 if not tarif.includingVAT else 1)
+    df["SystemTarif"] = tarif.systemtarif * (1.25 if not tarif.includingVAT else 1)
 
-    if not tarif.includingVAT:
-        tarif.nettarif = tarif.nettarif * 1.25
-        tarif.systemtarif = tarif.systemtarif * 1.25
-    df["NetTarif"] = tarif.nettarif
-    df["SystemTarif"] = tarif.systemtarif
-
-    # Calculate the total cost per hour
+    # Calculate total price
     df["TotalPrice"] = (df["SpotPrice"] + df["Charge"] + df["Tax"] + df["NetTarif"] + df["SystemTarif"]).round(3)
 
-    # Build the response object
+    # Find max/min for flagging
+    max_price = df["TotalPrice"].max()
+    min_price = df["TotalPrice"].min()
 
-    _prices = []
-
-    for index, row in df.iterrows():
-        _prices.append(
-            hourPrice(
-                hour=row["HourDK"],
-                totalprice=row["TotalPrice"],
-                spotprice=row["SpotPrice"],
-                isMax=bool(row["TotalPrice"] == df["TotalPrice"].max()),
-                isMin=bool(row["TotalPrice"] == df["TotalPrice"].min()),
-            )
+    # Build response
+    _prices = [
+        hourPrice(
+            hour=row["HourDK"],
+            totalprice=row["TotalPrice"],
+            spotprice=row["SpotPrice"],
+            isMax=(row["TotalPrice"] == max_price).item(),
+            isMin=(row["TotalPrice"] == min_price).item(),
         )
+        for _, row in df.iterrows()
+    ]
 
-    response = DaypriceResponse(qdate=qdate, uuid=device["uuid"], prices=_prices)
-
-    return response
+    return DaypriceResponse(qdate=qdate, uuid=device["uuid"], prices=_prices)

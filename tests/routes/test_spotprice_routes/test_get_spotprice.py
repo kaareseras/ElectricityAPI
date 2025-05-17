@@ -9,6 +9,8 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from freezegun import freeze_time
+
 from src.fastapi_app.services.user import _generate_tokens
 
 
@@ -36,6 +38,7 @@ def test_fetch_spotprice_while_not_logged_in(client, spotprice):
     assert response.status_code == 401
 
 
+@freeze_time("2025-05-17 0:0:00", tz_offset=2)
 def test_fetch_spotprice_by_date_with_no_date(
     client, spotprice_today, spotprice_yesterday, spotprice_tommorow, user, test_session
 ):
@@ -52,6 +55,7 @@ def test_fetch_spotprice_by_date_with_no_date(
     assert datetime.fromisoformat(response.json()[0]["HourDK"]).date() == datetime.now().date()
 
 
+@freeze_time("2025-05-17 0:0:00", tz_offset=2)
 def test_fetch_spotprice_by_date_and_area_for_tommorow(
     client, spotprice_today, spotprice_yesterday, spotprice_tommorow, user, test_session
 ):
