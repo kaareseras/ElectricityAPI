@@ -28,6 +28,12 @@ def test_update_chargeowner(client, chargeowner, user, test_session):
 
     assert response.status_code == 200
     assert response.json()["id"] is not None
+    assert response.json()["name"] == updated_chargeowner["name"]
+    assert response.json()["glnnumber"] == updated_chargeowner["glnnumber"]
+    assert response.json()["company"] == updated_chargeowner["company"]
+    assert response.json()["type"] == updated_chargeowner["type"]
+    assert response.json()["chargetype"] == updated_chargeowner["chargetype"]
+    assert response.json()["is_active"] == updated_chargeowner["is_active"]
 
 
 def test_update_chargeowner_while_not_logged_in(client, chargeowner):

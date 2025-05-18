@@ -53,6 +53,7 @@ async def update_chargeowner(data, session):
     chargeowner.chargetype = data.chargetype
     chargeowner.is_active = data.is_active
     chargeowner.updated_at = datetime.now(timezone.utc)
+    session.commit()
     session.refresh(chargeowner)
 
     return await fetch_chargeowner_details(chargeowner.id, session)
