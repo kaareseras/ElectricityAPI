@@ -36,6 +36,12 @@ SessionTesting = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+@pytest.fixture(autouse=True)
+def frozen_clock():
+    with freeze_time("2025-01-01 10:30:00", tz_offset=2) as frozen_datetime:
+        yield frozen_datetime
+
+
 @pytest.fixture(scope="function")
 def test_session() -> Generator:
     session = SessionTesting()
@@ -79,15 +85,6 @@ def auth_client(app_test, test_session, user):
     client = TestClient(app_test)
     client.headers["Authorization"] = f"Bearer {data['access_token']}"
     return client
-
-
-@pytest.fixture
-def frozen_time():
-    """Freezes time globally to 2025-05-16 00:00:00 Europe/Copenhagen."""
-    freezer = freeze_time("2025-05-16 00:00:00", tz_offset=2)  # tz_offset=2 for CEST
-    freezer.start()
-    yield datetime(2025, 5, 16, 0, 0, 0, tzinfo=ZoneInfo("Europe/Copenhagen"))
-    freezer.stop()
 
 
 @pytest.fixture(scope="function")
@@ -221,7 +218,6 @@ def spotprice(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def spotprice_yesterday(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
@@ -242,7 +238,6 @@ def spotprice_yesterday(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def spotprice_today(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
@@ -264,7 +259,6 @@ def spotprice_today(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def spotprice_tommorow(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
@@ -284,7 +278,6 @@ def spotprice_tommorow(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def spotprices_for_all_day(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
@@ -308,7 +301,6 @@ def spotprices_for_all_day(test_session):
     return spotprices
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def charge(test_session, chargeowner):
     model = Charge()
@@ -350,7 +342,6 @@ def charge(test_session, chargeowner):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def charge_prev(test_session, chargeowner):
     model = Charge()
@@ -392,7 +383,6 @@ def charge_prev(test_session, chargeowner):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def tax(test_session):
     model = Tax()
@@ -407,7 +397,6 @@ def tax(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def oldtax(test_session):
     model = Tax()
@@ -422,7 +411,6 @@ def oldtax(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def tarif(test_session):
     model = Tarif()
@@ -438,7 +426,6 @@ def tarif(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def oldtarif(test_session):
     model = Tarif()
@@ -454,7 +441,6 @@ def oldtarif(test_session):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def device(test_session, chargeowner, user):
     model = Device()
@@ -472,7 +458,6 @@ def device(test_session, chargeowner, user):
     return model
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 @pytest.fixture(scope="function")
 def device2(test_session, chargeowner, user):
     model = Device()

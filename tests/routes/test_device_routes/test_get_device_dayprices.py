@@ -8,14 +8,11 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from freezegun import freeze_time
-
 from src.fastapi_app.services.user import _generate_tokens
 
 
-@freeze_time("2025-05-17 10:30:00", tz_offset=2)
 def test_get_device_dayprices_success(
-    client, device, spotprices_for_all_day, tax, tarif, charge, chargeowner, user, test_session
+    client, user, device, spotprices_for_all_day, tax, tarif, charge, chargeowner, test_session
 ):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}

@@ -11,7 +11,6 @@ from src.fastapi_app.config.database import Base
 from src.fastapi_app.models.charge import *
 from src.fastapi_app.models.chargeowner import *
 from src.fastapi_app.models.device import *
-from src.fastapi_app.models.models import *
 from src.fastapi_app.models.spotprice import *
 from src.fastapi_app.models.tarif import *
 from src.fastapi_app.models.tax import *

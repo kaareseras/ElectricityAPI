@@ -23,10 +23,12 @@ async def get_tax_info(pk: int, session: Session = Depends(get_db_session), user
 
 @tax_router.get("/date", status_code=status.HTTP_200_OK, response_model=TaxResponse)
 async def get_tax_info(
-    qdate: datetime = datetime.now().astimezone().date(),
+    qdate: datetime = None,
     session: Session = Depends(get_db_session),
     user=Depends(get_current_user),
 ):
+    if qdate is None:
+        qdate = datetime.now().astimezone().date()
     return await tax.fetch_tax_by_date(qdate, session)
 
 

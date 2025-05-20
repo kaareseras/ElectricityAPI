@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from src.fastapi_app.config.database import get_db_session
@@ -17,21 +18,23 @@ tarif_router = APIRouter(
 
 
 @tarif_router.get("/id/{pk}", status_code=status.HTTP_200_OK, response_model=TarifResponse)
-async def get_tarif_info(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+async def get_tarif_info_by_ID(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await tarif.fetch_tarif_details(pk, session)
 
 
 @tarif_router.get("/date", status_code=status.HTTP_200_OK, response_model=TarifResponse)
-async def get_tarif_info(
-    qdate: datetime = datetime.now().astimezone().date(),
+async def get_tarif_info_by_date(
+    qdate: Optional[date] = Query(None),
     session: Session = Depends(get_db_session),
     user=Depends(get_current_user),
 ):
+    if qdate is None:
+        qdate = datetime.now().astimezone().date()
     return await tarif.fetch_tarif_by_date(qdate, session)
 
 
 @tarif_router.get("", status_code=status.HTTP_200_OK, response_model=list[TarifResponse])
-async def get_tarif_info(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+async def get_tarif_info_all_tarifs(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await tarif.fetch_tarifs(session)
 
 

@@ -60,7 +60,7 @@ def test_fetch_tarif_specific_date(client, tarif, oldtarif, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
-    qdate = datetime.now() - timedelta(days=10)
+    qdate = datetime.now().date() - timedelta(days=10)
 
     response = client.get("/tarif/date", headers=headers, params={"qdate": qdate})
 
@@ -77,7 +77,7 @@ def test_fetch_tarif_specific_date_not_found(client, tarif, oldtarif, user, test
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
-    qdate = datetime.now() - timedelta(days=100)
+    qdate = datetime.now().date() - timedelta(days=100)
 
     response = client.get("/tarif/date", headers=headers, params={"qdate": qdate})
 

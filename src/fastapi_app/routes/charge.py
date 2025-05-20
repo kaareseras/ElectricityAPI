@@ -31,10 +31,13 @@ async def get_charger_info(
 @charge_router.get("/date/gln", status_code=status.HTTP_200_OK, response_model=ChargeResponse)
 async def get_charges(
     chargeowner_glnnumber: str,
-    qdate: datetime = datetime.now().astimezone().date(),
+    qdate: datetime = None,
     session: Session = Depends(get_db_session),
     user=Depends(get_current_user),
 ):
+    if qdate is None:
+        qdate = datetime.now().astimezone().date()
+
     return await charge.fetch_charges_for_date_and_gln(session, qdate, chargeowner_glnnumber)
 
 
