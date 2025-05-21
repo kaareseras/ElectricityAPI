@@ -6,11 +6,10 @@ from src.fastapi_app.responses.base import BaseResponse
 
 class ChargeownerResponse(BaseResponse):
     id: int
-    name: str
     glnnumber: str
     company: str
-    type: str
     chargetype: str
+    chargetypecode: str
     is_active: bool
     created_at: Union[str, None, datetime] = None
     updated_at: Union[str, None, datetime] = None
@@ -19,9 +18,8 @@ class ChargeownerResponse(BaseResponse):
 
 class ChargeownerListResponse(BaseResponse):
     id: int
-    name: str
     glnnumber: str
     company: str
-    type: str
     chargetype: str
+    chargetypecode: str
     is_active: bool

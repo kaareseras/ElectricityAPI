@@ -10,11 +10,10 @@ from src.fastapi_app.config.database import Base
 class Chargeowner(Base):
     __tablename__ = "chargeowner"
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name = mapped_column(String(150))
     glnnumber = mapped_column(String(15))
     company = mapped_column(String(15))
-    type = mapped_column(String(150))
-    chargetype = mapped_column(String(255))
+    chargetype = mapped_column(String(150))
+    chargetypecode = mapped_column(String(150))
     updated_at = mapped_column(DateTime, nullable=True, default=None, onupdate=datetime.now)
     created_at = mapped_column(DateTime, nullable=False, server_default=func.now())
     is_active = mapped_column(Boolean, default=True)

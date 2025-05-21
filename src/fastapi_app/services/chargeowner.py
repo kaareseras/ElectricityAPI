@@ -17,11 +17,10 @@ async def fetch_chargeowner_details(data, session):
 
     my_chargeowner = ChargeownerResponse(
         id=chargeowner.id,
-        name=chargeowner.name,
         glnnumber=chargeowner.glnnumber,
         company=chargeowner.company,
-        type=chargeowner.type,
         chargetype=chargeowner.chargetype,
+        chargetypecode=chargeowner.chargetypecode,
         is_active=chargeowner.is_active,
         created_at=chargeowner.created_at,
         updated_at=chargeowner.updated_at,
@@ -46,11 +45,10 @@ async def update_chargeowner(data, session):
     if not chargeowner:
         raise HTTPException(status_code=404, detail="Chargeowner not found.")
 
-    chargeowner.name = data.name
     chargeowner.glnnumber = data.glnnumber
     chargeowner.company = data.company
-    chargeowner.type = data.type
     chargeowner.chargetype = data.chargetype
+    chargeowner.chargetypecode = data.chargetypecode
     chargeowner.is_active = data.is_active
     chargeowner.updated_at = datetime.now(timezone.utc)
     session.commit()
@@ -61,11 +59,10 @@ async def update_chargeowner(data, session):
 
 async def add_chargeowner(data, session):
     chargeowner = Chargeowner()
-    chargeowner.name = data.name
     chargeowner.glnnumber = data.glnnumber
     chargeowner.company = data.company
-    chargeowner.type = data.type
     chargeowner.chargetype = data.chargetype
+    chargeowner.chargetypecode = data.chargetypecode
     chargeowner.is_active = True
     chargeowner.created_at = datetime.now(timezone.utc)
     chargeowner.updated_at = datetime.now(timezone.utc)
@@ -88,11 +85,10 @@ async def fetch_chargeowners(session):
         my_chargeowners.append(
             ChargeownerListResponse(
                 id=chargeowner.id,
-                name=chargeowner.name,
                 company=chargeowner.company,
                 glnnumber=chargeowner.glnnumber,
-                type=chargeowner.type,
                 chargetype=chargeowner.chargetype,
+                chargetypecode=chargeowner.chargetypecode,
                 is_active=chargeowner.is_active,
                 created_at=chargeowner.created_at,
                 updated_at=chargeowner.updated_at,

@@ -13,29 +13,27 @@ def test_add_charger(client, user, test_session):
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
     new_chargeowner = {
-        "name": "Radius",
         "glnnumber": "5790000705689",
         "company": "Radius Elnet A/S",
-        "type": "DT_C_01",
         "chargetype": "D03",
+        "chargetypecode": "DT_C_01",
     }
 
     response = client.post("/chargeowner/", headers=headers, json=new_chargeowner)
 
     assert response.status_code == 200
     assert response.json()["id"] is not None
-    assert response.json()["name"] == "Radius"
+    assert response.json()["company"] == "Radius Elnet A/S"
 
 
 def test_add_chargeowner_while_not_logged_in(client, test_session):
     headers = {}
 
     new_chargeowner = {
-        "name": "Radius",
         "glnnumber": "5790000705689",
         "company": "Radius Elnet A/S",
-        "type": "DT_C_01",
-        "chargetype": "D03",
+        "chargetype": "DT_C_01",
+        "chargetypecode": "D03",
     }
 
     response = client.post("/chargeowner/", headers=headers, json=new_chargeowner)

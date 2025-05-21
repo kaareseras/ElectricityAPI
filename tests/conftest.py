@@ -189,11 +189,10 @@ def admin_auth_client(app_test, test_session, admin_user):
 @pytest.fixture(scope="function")
 def chargeowner(test_session):
     model = Chargeowner()
-    model.name = "Radius"
     model.glnnumber = "5790000705689"
     model.company = "Radius Elnet A/S"
-    model.type = "DT_C_01"
     model.chargetype = "D03"
+    model.chargetypecode = "DT_C_01"
     model.is_active = True
     model.created_at = datetime.now(UTC)
     model.updated_at = datetime.now(UTC)
