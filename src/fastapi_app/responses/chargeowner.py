@@ -7,7 +7,7 @@ from src.fastapi_app.responses.base import BaseResponse
 class ChargeownerResponse(BaseResponse):
     id: int
     glnnumber: str
-    company: str
+    compagny: str
     chargetype: str
     chargetypecode: str
     is_active: bool
@@ -19,7 +19,7 @@ class ChargeownerResponse(BaseResponse):
 class ChargeownerListResponse(BaseResponse):
     id: int
     glnnumber: str
-    company: str
+    compagny: str
     chargetype: str
     chargetypecode: str
     is_active: bool

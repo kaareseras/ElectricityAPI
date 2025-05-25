@@ -17,7 +17,7 @@ def test_update_chargeowner(client, chargeowner, user, test_session):
     updated_chargeowner = {
         "id": chargeowner.id,
         "glnnumber": "5790000705689",
-        "company": "Radius Elnet A/S",
+        "compagny": "Radius Elnet A/S",
         "chargetype": "D03",
         "chargetypecode": "DT_C_01",
         "is_active": False,
@@ -31,7 +31,7 @@ def test_update_chargeowner(client, chargeowner, user, test_session):
     assert response.status_code == 200
     assert response.json()["id"] is not None
     assert response.json()["glnnumber"] == updated_chargeowner["glnnumber"]
-    assert response.json()["company"] == updated_chargeowner["company"]
+    assert response.json()["compagny"] == updated_chargeowner["compagny"]
     assert response.json()["chargetype"] == updated_chargeowner["chargetype"]
     assert response.json()["chargetypecode"] == updated_chargeowner["chargetypecode"]
     assert response.json()["is_active"] == updated_chargeowner["is_active"]
@@ -50,7 +50,7 @@ def test_add_chargeowner_with_missing_data(client, chargeowner, user, test_sessi
     updated_chargeowner = {
         "id": chargeowner.id,
         "glnnumber": "5790000705689",
-        "company": "Radius Elnet A/S",
+        "compagny": "Radius Elnet A/S",
         "chargetype": "DT_C_01",
         # "chargetypecode": "D03", <-- Missing this field
     }

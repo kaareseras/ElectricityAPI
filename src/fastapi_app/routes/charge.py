@@ -22,10 +22,15 @@ async def get_charge_info(pk: int, session: Session = Depends(get_db_session), u
 
 
 @charge_router.get("/gln/{chargeowner_glnnumber}", status_code=status.HTTP_200_OK, response_model=list[ChargeResponse])
-async def get_charger_info(
+async def get_charger_info_by_gln(
     chargeowner_glnnumber: str, session: Session = Depends(get_db_session), user=Depends(get_current_user)
 ):
-    return await charge.fetch_charges_for_chargeowner(session, chargeowner_glnnumber)
+    return await charge.fetch_charges_for_chargeowner_by_gln(session, chargeowner_glnnumber)
+
+
+@charge_router.get("/chargeowner/{id}", status_code=status.HTTP_200_OK, response_model=list[ChargeResponse])
+async def get_charger_info(id: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+    return await charge.fetch_charges_for_chargeowner(session, id)
 
 
 @charge_router.get("/date/gln", status_code=status.HTTP_200_OK, response_model=ChargeResponse)
@@ -42,10 +47,10 @@ async def get_charges(
 
 
 @charge_router.post("", status_code=status.HTTP_200_OK, response_model=ChargeResponse)
-async def add_new_charge(
+async def upsert_new_charge(
     data: AddChargeRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)
 ):
-    return await charge.add_charge(data, session)
+    return await charge.upsert_charge(data, session)
 
 
 @charge_router.delete("/{pk}", status_code=status.HTTP_200_OK)

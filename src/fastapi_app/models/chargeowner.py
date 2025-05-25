@@ -11,7 +11,7 @@ class Chargeowner(Base):
     __tablename__ = "chargeowner"
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     glnnumber = mapped_column(String(15))
-    company = mapped_column(String(15))
+    compagny = mapped_column(String(150))
     chargetype = mapped_column(String(150))
     chargetypecode = mapped_column(String(150))
     updated_at = mapped_column(DateTime, nullable=True, default=None, onupdate=datetime.now)

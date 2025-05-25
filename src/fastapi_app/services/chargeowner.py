@@ -18,7 +18,7 @@ async def fetch_chargeowner_details(data, session):
     my_chargeowner = ChargeownerResponse(
         id=chargeowner.id,
         glnnumber=chargeowner.glnnumber,
-        company=chargeowner.company,
+        compagny=chargeowner.compagny,
         chargetype=chargeowner.chargetype,
         chargetypecode=chargeowner.chargetypecode,
         is_active=chargeowner.is_active,
@@ -46,7 +46,7 @@ async def update_chargeowner(data, session):
         raise HTTPException(status_code=404, detail="Chargeowner not found.")
 
     chargeowner.glnnumber = data.glnnumber
-    chargeowner.company = data.company
+    chargeowner.compagny = data.compagny
     chargeowner.chargetype = data.chargetype
     chargeowner.chargetypecode = data.chargetypecode
     chargeowner.is_active = data.is_active
@@ -60,7 +60,7 @@ async def update_chargeowner(data, session):
 async def add_chargeowner(data, session):
     chargeowner = Chargeowner()
     chargeowner.glnnumber = data.glnnumber
-    chargeowner.company = data.company
+    chargeowner.compagny = data.compagny
     chargeowner.chargetype = data.chargetype
     chargeowner.chargetypecode = data.chargetypecode
     chargeowner.is_active = True
@@ -79,13 +79,13 @@ async def fetch_chargeowners(session):
     my_chargeowners = []
 
     if not chargeowners:
-        raise HTTPException(status_code=404, detail="No chargeowners found.")
+        return []
 
     for chargeowner in chargeowners:
         my_chargeowners.append(
             ChargeownerListResponse(
                 id=chargeowner.id,
-                company=chargeowner.company,
+                compagny=chargeowner.compagny,
                 glnnumber=chargeowner.glnnumber,
                 chargetype=chargeowner.chargetype,
                 chargetypecode=chargeowner.chargetypecode,

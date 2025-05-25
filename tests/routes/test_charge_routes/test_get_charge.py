@@ -95,7 +95,7 @@ def test_fetch_charge_by_date_and_chargeowner(client, charge, chargeowner, user,
     assert valid_from <= qdate < valid_to
 
 
-def test_fetch_charge_by_chargeowner(client, charge, charge_prev, chargeowner, user, test_session):
+def test_fetch_charge_by_chargeowner_gln(client, charge, charge_prev, chargeowner, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
@@ -107,6 +107,17 @@ def test_fetch_charge_by_chargeowner(client, charge, charge_prev, chargeowner, u
     valid_from = datetime.strptime(response.json()["valid_from"], "%Y-%m-%dT%H:%M:%S").date()
     valid_to = datetime.strptime(response.json()["valid_to"], "%Y-%m-%dT%H:%M:%S").date()
     assert valid_from <= datetime.now().date() < valid_to
+
+
+def test_fetch_charge_by_chargeowner_id(client, charge, charge_prev, chargeowner, user, test_session):
+    data = _generate_tokens(user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    response = client.get(f"/charge/chargeowner/{chargeowner.id}", headers=headers)
+    charges = response.json()
+    assert response.status_code == 200
+    assert isinstance(charges, list)
+    assert len(charges) == 2
 
 
 def test_fetch_charge_by_chargeowner_and_date(client, charge, charge_prev, chargeowner, user, test_session):

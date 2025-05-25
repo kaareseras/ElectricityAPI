@@ -29,4 +29,5 @@ def test_fetch_chargeowners_with_no_chargers_in_DB(client, user, test_session):
 
     response = client.get("/chargeowner/", headers=headers)
 
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []

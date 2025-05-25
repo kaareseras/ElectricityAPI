@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class AddChargeownerRequest(BaseModel):
     glnnumber: str
-    company: str
+    compagny: str
     chargetype: str
     chargetypecode: str
 
