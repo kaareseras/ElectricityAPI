@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from fastapi import HTTPException
 from sqlalchemy import and_, or_
 
@@ -79,7 +77,13 @@ async def delete_tax(pk, session):
     return {"message": "Tax deleted successfully."}
 
 
-async def add_tax(data, session):
+async def upsert_tax(data, session):
+    new_tax = Tax()
+    new_tax.valid_from = data.valid_from
+    new_tax.valid_to = data.valid_to
+    new_tax.taxammount = data.taxammount
+    new_tax.includingVAT = data.includingVAT
+
     existing_tax = (
         session.query(Tax)
         .filter(
@@ -91,17 +95,23 @@ async def add_tax(data, session):
         .first()
     )
 
-    if existing_tax:
+    # If the latest tax is None, it means there are no taxes
+    if not existing_tax:
+        session.add(new_tax)
+        session.commit()
+        session.refresh(new_tax)
+        return await fetch_tax_details(new_tax.id, session)
+
+    # If the new tax's valid_from  is after the existing tax's valid_from
+    # meaning its a newer tax, we can update the existing tax's valid_to
+    # and add the new tax
+    elif existing_tax.valid_from < new_tax.valid_from:
+        existing_tax.valid_to = new_tax.valid_from
+        session.add(new_tax)
+        session.commit()
+        session.refresh(new_tax)
+        return await fetch_tax_details(new_tax.id, session)
+
+    # if the current tax is still applicable
+    else:
         raise HTTPException(status_code=404, detail="A tax already exists within the specified date range.")
-
-    tax = Tax()
-    tax.valid_from = data.valid_from
-    tax.valid_to = data.valid_to
-    tax.taxammount = data.taxammount
-    tax.includingVAT = data.includingVAT
-    tax.created_at = datetime.now(timezone.utc)
-    session.add(tax)
-    session.commit()
-    session.refresh(tax)
-
-    return await fetch_tax_details(tax.id, session)

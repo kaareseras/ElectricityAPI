@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from fastapi import HTTPException
 from sqlalchemy import and_, or_
 
@@ -82,7 +80,14 @@ async def delete_tarif(data, session):
     return {"message": "Tarif deleted successfully."}
 
 
-async def add_tarif(data, session):
+async def upsert_tarif(data, session):
+    new_tarif = Tarif()
+    new_tarif.valid_from = data.valid_from
+    new_tarif.valid_to = data.valid_to
+    new_tarif.nettarif = data.nettarif
+    new_tarif.systemtarif = data.systemtarif
+    new_tarif.includingVAT = data.includingVAT
+
     existing_tarif = (
         session.query(Tarif)
         .filter(
@@ -94,18 +99,23 @@ async def add_tarif(data, session):
         .first()
     )
 
-    if existing_tarif:
+    # If the latest tarif is None, it means there are no tarifs
+    if not existing_tarif:
+        session.add(new_tarif)
+        session.commit()
+        session.refresh(new_tarif)
+        return await fetch_tarif_details(new_tarif.id, session)
+
+    # If the new tarif's valid_from is after the existing tarif's valid_from
+    # meaning its a nwer tarif, we can update the existing tarif's valid_to
+    # and add the new tarif
+    elif existing_tarif.valid_from < new_tarif.valid_from:
+        existing_tarif.valid_to = new_tarif.valid_from
+        session.add(new_tarif)
+        session.commit()
+        session.refresh(new_tarif)
+        return await fetch_tarif_details(new_tarif.id, session)
+
+    # if the current tarif is still applicable
+    else:
         raise HTTPException(status_code=404, detail="A tarif already exists within the specified date range.")
-
-    tarif = Tarif()
-    tarif.valid_from = data.valid_from
-    tarif.valid_to = data.valid_to
-    tarif.nettarif = data.nettarif
-    tarif.systemtarif = data.systemtarif
-    tarif.includingVAT = data.includingVAT
-    tarif.created_at = datetime.now(timezone.utc)
-    session.add(tarif)
-    session.commit()
-    session.refresh(tarif)
-
-    return await fetch_tarif_details(tarif.id, session)

@@ -18,7 +18,7 @@ tarif_router = APIRouter(
 
 
 @tarif_router.get("/id/{pk}", status_code=status.HTTP_200_OK, response_model=TarifResponse)
-async def get_tarif_info_by_ID(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+async def get_tarif_info_by_id(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await tarif.fetch_tarif_details(pk, session)
 
 
@@ -42,7 +42,7 @@ async def get_tarif_info_all_tarifs(session: Session = Depends(get_db_session), 
 async def add_new_tarif(
     data: AddTarifRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)
 ):
-    return await tarif.add_tarif(data, session)
+    return await tarif.upsert_tarif(data, session)
 
 
 @tarif_router.delete("/{pk}", status_code=status.HTTP_200_OK)

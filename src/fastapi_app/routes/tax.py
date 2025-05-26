@@ -17,12 +17,12 @@ tax_router = APIRouter(
 
 
 @tax_router.get("/id/{pk}", status_code=status.HTTP_200_OK, response_model=TaxResponse)
-async def get_tax_info(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+async def get_tax_info_by_id(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await tax.fetch_tax_details(pk, session)
 
 
 @tax_router.get("/date", status_code=status.HTTP_200_OK, response_model=TaxResponse)
-async def get_tax_info(
+async def get_tax_info_by_dat(
     qdate: datetime = None,
     session: Session = Depends(get_db_session),
     user=Depends(get_current_user),
@@ -39,7 +39,7 @@ async def get_tax_info(session: Session = Depends(get_db_session), user=Depends(
 
 @tax_router.post("", status_code=status.HTTP_200_OK, response_model=TaxResponse)
 async def add_new_tax(data: AddTaxRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
-    return await tax.add_tax(data, session)
+    return await tax.upsert_tax(data, session)
 
 
 @tax_router.delete("/{pk}", status_code=status.HTTP_200_OK)

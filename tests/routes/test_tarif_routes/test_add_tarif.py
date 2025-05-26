@@ -5,6 +5,8 @@
 /tarifs/{tarif_id}
 """
 
+from datetime import timedelta
+
 from src.fastapi_app.services.user import _generate_tokens
 
 
@@ -41,6 +43,27 @@ def test_add_tarif_within_existing_tarif_period(client, tarif, user, test_sessio
     response = client.post("/tarif/", headers=headers, json=new_tarif)
 
     assert response.status_code == 404
+
+
+def test_add_tarif_with_new_tax_period(client, tarif, user, test_session):
+    data = _generate_tokens(user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    new_start_date = tarif.valid_from + timedelta(days=1)
+
+    new_tarif = {
+        "valid_from": new_start_date.strftime("%Y-%m-%dT%H:%M:%S"),
+        "valid_to": tarif.valid_to.strftime("%Y-%m-%dT%H:%M:%S"),
+        "nettarif": 0.1,
+        "systemtarif": 0.2,
+        "includingVAT": True,
+    }
+
+    response = client.post("/tarif/", headers=headers, json=new_tarif)
+
+    assert response.status_code == 200
+    assert response.json()["id"] is not None
+    assert response.json()["valid_from"] == new_start_date.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def test_add_tarif_while_not_logged_in(client, test_session):
