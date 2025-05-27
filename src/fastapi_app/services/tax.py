@@ -47,7 +47,7 @@ async def fetch_tax_by_date(qdate, session):
 
 
 async def fetch_taxes(session):
-    taxes = session.query(Tax).all()
+    taxes = session.query(Tax).order_by(Tax.valid_from).all()
     _error = ""
     if not taxes:
         raise HTTPException(status_code=404, detail="Tax not found.")

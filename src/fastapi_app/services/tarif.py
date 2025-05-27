@@ -49,7 +49,7 @@ async def fetch_tarif_by_date(qdate, session):
 
 
 async def fetch_tarifs(session):
-    tarifs = session.query(Tarif).all()
+    tarifs = session.query(Tarif).order_by(Tarif.valid_from).all()
     _error = ""
     if not tarifs:
         raise HTTPException(status_code=404, detail="Tarif not found.")
