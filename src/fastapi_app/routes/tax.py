@@ -32,8 +32,8 @@ async def get_tax_info_by_dat(
     return await tax.fetch_tax_by_date(qdate, session)
 
 
-@tax_router.get("", status_code=status.HTTP_200_OK, response_model=list[TaxResponse])
-async def get_tax_info(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+@tax_router.get("", status_code=status.HTTP_200_OK, response_model=list[TaxResponse], operation_id="get_all_taxes")
+async def get_tax_info(session: Session = Depends(get_db_session)):
     return await tax.fetch_taxes(session)
 
 

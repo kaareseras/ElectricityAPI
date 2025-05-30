@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi_mcp import FastApiMCP
 
 from src.fastapi_app.routes import admin, charge, chargeowner, device, spotprice, tarif, tax, user
 
@@ -58,6 +59,16 @@ templates = Jinja2Templates(directory=parent_path / "templates")
 templates.env.globals["prod"] = os.environ.get("RUNNING_IN_PRODUCTION", False)
 # Use relative path for url_for, so that it works behind a proxy like Codespaces
 templates.env.globals["url_for"] = app.url_path_for
+
+
+# Filter by including specific operation IDs
+include_operations_mcp = FastApiMCP(
+    app,
+    name="Tax API MCP - Included Operations",
+    include_operations=["get_taxes"],
+)
+
+include_operations_mcp.mount(mount_path="/get-taxes-mcp")
 
 
 @app.get("/", response_class=HTMLResponse)
