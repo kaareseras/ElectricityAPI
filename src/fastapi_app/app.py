@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_mcp import FastApiMCP
 
-from src.fastapi_app.routes import admin, charge, chargeowner, device, spotprice, tarif, tax, user
+from src.fastapi_app.routes import admin, charge, chargeowner, copilot, device, spotprice, tarif, tax, user
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
@@ -32,6 +32,7 @@ def create_application():
     application.include_router(tax.tax_router)
     application.include_router(tarif.tarif_router)
     application.include_router(device.device_router)
+    application.include_router(copilot.copilot_router)
 
     # Tillad CORS for Vue-app
     origins = [
