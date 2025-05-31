@@ -103,3 +103,5 @@ alembic revision --autogenerate -m 'create my table table'
 
 alembic upgrade head
 
+npx @modelcontextprotocol/inspector
+

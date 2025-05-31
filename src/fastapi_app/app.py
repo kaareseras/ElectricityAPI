@@ -65,7 +65,7 @@ templates.env.globals["url_for"] = app.url_path_for
 include_operations_mcp = FastApiMCP(
     app,
     name="Tax API MCP - Included Operations",
-    include_operations=["get_taxes"],
+    include_operations=["get_all_taxes", "get_spotprices_by_date_area"],
 )
 
 include_operations_mcp.mount(mount_path="/get-taxes-mcp")

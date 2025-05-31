@@ -21,9 +21,14 @@ async def get_spotprices(session: Session = Depends(get_db_session), user=Depend
     return await spotprice.fetch_spotprices(session)
 
 
-@spotprice_router.get("/date/area", status_code=status.HTTP_200_OK, response_model=list[SpotpriceResponse])
+@spotprice_router.get(
+    "/date/area",
+    status_code=status.HTTP_200_OK,
+    response_model=list[SpotpriceResponse],
+    operation_id="get_spotprices_by_date_area",
+)
 async def get_spotprices_by_date_area(
-    pricearea: str, qdate: datetime = None, session: Session = Depends(get_db_session), user=Depends(get_current_user)
+    pricearea: str, qdate: datetime = None, session: Session = Depends(get_db_session)
 ):
     print(f"Fetching spotprices for {pricearea} on {qdate}")
     return await spotprice.fetch_spotprices_for_date(session, qdate, pricearea)
