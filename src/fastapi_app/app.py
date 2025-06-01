@@ -11,7 +11,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_mcp import FastApiMCP
 
+from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.routes import admin, charge, chargeowner, copilot, device, spotprice, tarif, tax, user
+
+config = get_settings()
 
 # Setup logger and Azure Monitor:
 logger = logging.getLogger("app")
@@ -69,7 +72,7 @@ include_operations_mcp = FastApiMCP(
     include_operations=["get_all_taxes", "get_spotprices_by_date_area"],
 )
 
-include_operations_mcp.mount(mount_path="/get-taxes-mcp")
+include_operations_mcp.mount(mount_path="/" + config.MCP_ROUTE)
 
 
 @app.get("/", response_class=HTMLResponse)

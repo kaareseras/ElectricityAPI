@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     # FrontEnd Application
     FRONTEND_HOST: str = os.environ.get("FRONTEND_HOST", "http://localhost:3000")
 
+    # Backend Application
+    BACKEND_HOST: str = os.environ.get("BACKEND_HOST", "http://localhost:8000")
+
     # Azure PostgreSQL Config
     WEBSITE_HOSTNAME: str = os.environ.get("WEBSITE_HOSTNAME", "")
     AZURE_POSTGRESQL_CONNECTIONSTRING: str = os.environ.get("AZURE_POSTGRESQL_CONNECTIONSTRING", "")
@@ -45,6 +48,9 @@ class Settings(BaseSettings):
     AZURE_OPENAI_DEPLOYMENT: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "")
     AZURE_OPENAI_ENDPOINT: str = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
     AZURE_OPENAI_KEY: str = os.environ.get("AZURE_OPENAI_KEY", "")
+
+    # MCP endpoint
+    MCP_ROUTE: str = os.environ.get("MCP_ROUTE", "get-taxes-mcp")
 
 
 @lru_cache
