@@ -45,9 +45,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "8deadce9449770680910741063cd0a3fe0acb62a8978661f421bbcbb66dc41f1")
 
     # GPT Configuration
-    AZURE_OPENAI_DEPLOYMENT: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "")
-    AZURE_OPENAI_ENDPOINT: str = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-    AZURE_OPENAI_KEY: str = os.environ.get("AZURE_OPENAI_KEY", "")
+    AZURE_OPENAI_DEPLOYMENT: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "mydeployment")
+    AZURE_OPENAI_ENDPOINT: str = os.environ.get("AZURE_OPENAI_ENDPOINT", "https://myendpoint.openai.azure.com/")
+    AZURE_OPENAI_KEY: str = os.environ.get("AZURE_OPENAI_KEY", "Mykey1234567890")
 
     # MCP endpoint
     MCP_ROUTE: str = os.environ.get("MCP_ROUTE", "get-taxes-mcp")
