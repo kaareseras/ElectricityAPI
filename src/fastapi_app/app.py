@@ -39,8 +39,8 @@ def create_application():
 
     # Tillad CORS for Vue-app
     origins = [
-        # "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
-        # "http://localhost:3000",  # Lokalt udviklingsmiljø
+        "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
+        "http://localhost:3000",  # Lokalt udviklingsmiljø
     ]
 
     application.add_middleware(
