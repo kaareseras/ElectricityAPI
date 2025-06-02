@@ -5,7 +5,8 @@
 4 - Test activation is not allowining invalid email
 """
 
-import time
+from datetime import datetime
+from unittest.mock import patch
 
 from src.fastapi_app.config.security import hash_password
 from src.fastapi_app.models.user import User
@@ -24,18 +25,24 @@ def test_user_account_verification(client, inactive_user, test_session):
 
 
 def test_user_link_doesnot_work_twice(client, inactive_user, test_session):
-    token_context = inactive_user.get_context_string(USER_VERIFY_ACCOUNT)
-    token = hash_password(token_context)
+    fake_now = datetime(2025, 1, 4, 0, 0, 0)
+    fake_now_10 = datetime(2025, 1, 4, 0, 0, 10)
+    with patch("src.fastapi_app.utils.time_utils.datetime") as mock_datetime:
+        mock_datetime.now.return_value = fake_now
+        mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+        token_context = inactive_user.get_context_string(USER_VERIFY_ACCOUNT)
+        token = hash_password(token_context)
 
-    data = {"email": inactive_user.email, "token": token}
-    response = client.post("/users/verify", json=data)
-    assert response.status_code == 200
+        data = {"email": inactive_user.email, "token": token}
+        response = client.post("/users/verify", json=data)
+        assert response.status_code == 200
 
-    time.sleep(1)
-    ## Account is activated now, let make another call to check if that works,
-    # it should not work though
-    response = client.post("/users/verify", json=data)
-    assert response.status_code != 200
+        mock_datetime.now.return_value = fake_now_10
+        mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+        ## Account is activated now, let make another call to check if that works,
+        # it should not work though
+        response = client.post("/users/verify", json=data)
+        assert response.status_code != 200
 
 
 def test_user_invalid_token_does_not_work(client, inactive_user, test_session):
