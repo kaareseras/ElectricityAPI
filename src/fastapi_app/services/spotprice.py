@@ -101,7 +101,7 @@ async def fetch_spotprices_for_date(session, qdate: Date, pricearea: str):
     )
 
     if not spotprices:
-        raise HTTPException(status_code=404, detail="No spotprices found.")
+        raise HTTPException(status_code=404, detail=f"No spotprices found for date {qdate} and area {pricearea}.")
 
     my_spotprices = []
 
