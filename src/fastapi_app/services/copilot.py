@@ -43,6 +43,8 @@ async def get_chat_response(request: ChatRequest):
         If you don't know the answer, say that you don't know.
         Answer in Danish exept if the user is asking in a different language, then answer in that language.
         Limit the data gathered to maximum of 5 day for spotprices.
+        Spotprices are only available from 1/4 2025 days and current day.
+        Spotprices is avialable for tomorrow if the time is after 2pm today.
         """
     kernel, chat_service, settings = get_kernel()
 
@@ -53,7 +55,7 @@ async def get_chat_response(request: ChatRequest):
 
     async with MCPSsePlugin(
         name="prices",
-        description="get danish electricity tax prices",
+        description="get danish electricity tax prices and spotprices",
         url=mcp_url,
     ) as price_plugin:
         kernel.add_plugin(price_plugin)
@@ -61,6 +63,6 @@ async def get_chat_response(request: ChatRequest):
         if not result.items:
             raise HTTPException(status_code=404, detail="No response from the chat service.")
         response = ChatResponse(
-            assistant=result.items[0].text,
+            content=result.items[0].text,
         )
         return response

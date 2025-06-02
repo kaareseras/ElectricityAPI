@@ -8,4 +8,4 @@ class ChatHistoryElement(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    history: list[ChatHistoryElement]
+    history: list[ChatHistoryElement] = []
