@@ -6,7 +6,6 @@ import python_multipart  # noqa
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -40,8 +39,8 @@ def create_application():
 
     # Tillad CORS for Vue-app
     origins = [
-        "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
-        "http://localhost:3000",  # Lokalt udviklingsmiljø
+        # "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
+        # "http://localhost:3000",  # Lokalt udviklingsmiljø
     ]
 
     application.add_middleware(
@@ -51,7 +50,6 @@ def create_application():
         allow_methods=["*"],  # Tillad alle HTTP-metoder (GET, POST, PUT, DELETE, etc.)
         allow_headers=["*"],  # Tillad alle headers
     )
-    application.add_middleware(HTTPSRedirectMiddleware)
 
     return application
 
