@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Union
 
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
 
 from src.fastapi_app.responses.base import BaseResponse
 
@@ -15,7 +15,7 @@ class UserResponse(BaseResponse):
     created_at: Union[str, None, datetime] = None
 
 
-class LoginResponse(BaseModel):
+class LoginResponse(BaseResponse):
     access_token: str
     refresh_token: str
     expires_in: int

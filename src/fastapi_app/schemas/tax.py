@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class AddTaxRequest(BaseModel):
+class AddTaxRequest(BaseSchema):
     valid_from: datetime
     valid_to: datetime
     taxammount: float

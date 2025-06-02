@@ -1,16 +1,17 @@
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class AddChargeRequest(BaseModel):
+class AddChargeRequest(BaseSchema):
     chargeowner_id: int
     charge_type: str
     charge_type_code: str
     note: str
     description: str
-    valid_from: datetime = None
-    valid_to: datetime = None
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
     price1: float
     price2: float
     price3: float

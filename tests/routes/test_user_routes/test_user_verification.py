@@ -5,8 +5,6 @@
 4 - Test activation is not allowining invalid email
 """
 
-from datetime import timedelta
-
 from src.fastapi_app.config.security import hash_password
 from src.fastapi_app.models.user import User
 from src.fastapi_app.utils.email_context import USER_VERIFY_ACCOUNT
@@ -23,12 +21,9 @@ def test_user_account_verification(client, inactive_user, test_session):
     assert activated_user.verified_at is not None
 
 
-def test_user_link_doesnot_work_twice(frozen_clock, client, inactive_user, test_session):
+def test_user_link_doesnot_work_twice(client, inactive_user, test_session):
     token_context = inactive_user.get_context_string(USER_VERIFY_ACCOUNT)
     token = hash_password(token_context)
-
-    # Advance time by 1 second
-    frozen_clock.tick(timedelta(seconds=1))
 
     data = {"email": inactive_user.email, "token": token}
     response = client.post("/users/verify", json=data)

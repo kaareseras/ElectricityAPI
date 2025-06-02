@@ -31,15 +31,31 @@ USER_NAME = "kaare"
 USER_EMAIL = "kaare@seras.dk"
 USER_PASSWORD = "Password3!"
 
+
+@pytest.fixture
+def user_name():
+    return USER_NAME
+
+
+@pytest.fixture
+def user_email():
+    return USER_EMAIL
+
+
+@pytest.fixture
+def user_password():
+    return USER_PASSWORD
+
+
 engine = create_engine("sqlite:///./fastapi.db")
 SessionTesting = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@pytest.fixture(autouse=True)
-def frozen_clock():
-    with freeze_time("2025-01-01 10:30:00", tz_offset=2) as frozen_datetime:
-        yield frozen_datetime
+@pytest.fixture
+def frozen_time():
+    with freeze_time("2025-01-04T00:00:00"):
+        yield
 
 
 @pytest.fixture(scope="function")

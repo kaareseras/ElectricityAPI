@@ -6,11 +6,9 @@
 .....
 """
 
-from tests.conftest import USER_PASSWORD
 
-
-def test_user_login(client, test_session, user):
-    data = {"username": user.email, "password": USER_PASSWORD}
+def test_user_login(client, test_session, user, user_password):
+    data = {"username": user.email, "password": user_password}
     response = client.post("/auth/login", data=data)
     assert response.status_code == 200
     assert response.json()["access_token"] is not None
@@ -18,22 +16,22 @@ def test_user_login(client, test_session, user):
     assert response.json()["expires_in"] is not None
 
 
-def test_user_login_wrong_password(client, user):
+def test_user_login_wrong_password(client, user, user_password):
     response = client.post("/auth/login", data={"username": user.email, "password": "wrong_password"})
     assert response.status_code == 400
     assert response.json()["detail"] == "Incorrect email or password."
 
 
-def test_user_login_wrong_email(client):
-    response = client.post("/auth/login", data={"username": "abc@describly.com", "password": USER_PASSWORD})
+def test_user_login_wrong_email(client, user, user_password):
+    response = client.post("/auth/login", data={"username": "abc@describly.com", "password": user_password})
     assert response.status_code == 400
 
 
-def test_user_login_inactive_account(client, inactive_user):
-    response = client.post("/auth/login", data={"username": inactive_user.email, "password": USER_PASSWORD})
+def test_user_login_inactive_account(client, inactive_user, user_password):
+    response = client.post("/auth/login", data={"username": inactive_user.email, "password": user_password})
     assert response.status_code == 400
 
 
-def test_user_login_unverified(client, unverified_user):
-    response = client.post("/auth/login", data={"username": unverified_user.email, "password": USER_PASSWORD})
+def test_user_login_unverified(client, unverified_user, user_password):
+    response = client.post("/auth/login", data={"username": unverified_user.email, "password": user_password})
     assert response.status_code == 400

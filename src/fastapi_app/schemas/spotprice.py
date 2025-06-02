@@ -1,22 +1,22 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class AddSpotpriceRequest(BaseModel):
+class AddSpotpriceRequest(BaseSchema):
     HourUTC: str
     HourDK: str
     PriceArea: str
     SpotpriceDKK: float
 
 
-class MultiAreaEntry(BaseModel):
+class MultiAreaEntry(BaseSchema):
     deliveryStart: datetime
     deliveryEnd: datetime
     entryPerArea: dict[str, float]
 
 
-class PriceRequest(BaseModel):
+class PriceRequest(BaseSchema):
     deliveryDateCET: str
     version: int
     updatedAt: str

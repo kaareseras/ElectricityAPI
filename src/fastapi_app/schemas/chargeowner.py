@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class AddChargeownerRequest(BaseModel):
+class AddChargeownerRequest(BaseSchema):
     glnnumber: str
     compagny: str
     chargetype: str

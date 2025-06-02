@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class AddDeviceRequest(BaseModel):
+class AddDeviceRequest(BaseSchema):
     uuid: str
 
 
-class UpdateDeviceRequest(BaseModel):
+class UpdateDeviceRequest(BaseSchema):
     uuid: str
     name: str | None
     chargeowner_id: int | None

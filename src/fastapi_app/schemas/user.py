@@ -1,27 +1,29 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
+
+from src.fastapi_app.schemas.base import BaseSchema
 
 
-class RegisterUserRequest(BaseModel):
+class RegisterUserRequest(BaseSchema):
     name: str
     email: EmailStr
     password: str
 
 
-class UpdateUserRequest(BaseModel):
+class UpdateUserRequest(BaseSchema):
     name: str
     email: EmailStr
 
 
-class VerifyUserRequest(BaseModel):
+class VerifyUserRequest(BaseSchema):
     token: str
     email: EmailStr
 
 
-class EmailRequest(BaseModel):
+class EmailRequest(BaseSchema):
     email: EmailStr
 
 
-class ResetRequest(BaseModel):
+class ResetRequest(BaseSchema):
     token: str
     email: EmailStr
     password: str
