@@ -93,11 +93,13 @@ async def get_chat_response(request: ChatRequest):
     chat_history.add_user_message(request.message)
     history = parse_chat_history(chat_history, request.history)
 
+    print(mcp_url)
+
     async with MCPStdioPlugin(
         name="prices",
         description="get danish electricity tax prices and spotprices",
         command="npx",
-        args=["mcp-remote", "http://localhost:8000/get-taxes-mcp"],
+        args=["mcp-remote", mcp_url],
     ) as price_plugin:
         kernel.add_plugin(price_plugin)
         result = await chat_service.get_chat_message_content(history, settings, kernel=kernel)
