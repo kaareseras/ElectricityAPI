@@ -40,6 +40,7 @@ def create_application():
     # Tillad CORS for Vue-app
     origins = [
         "https://thankful-glacier-0d5087003.6.azurestaticapps.net",  # Azure Static Web App
+        "https://mcp-server.calmbay-a3cdc274.swedencentral.azurecontainerapps.io",  # MCP server
         "http://localhost:3000",  # Lokalt udviklingsmiljø
     ]
 
@@ -71,7 +72,7 @@ include_operations_mcp = FastApiMCP(
     include_operations=["get_all_taxes", "get_spotprices_by_date_area"],
 )
 
-include_operations_mcp.mount(mount_path="/" + config.MCP_ROUTE)
+include_operations_mcp.mount(mount_path="/sse")
 
 
 @app.get("/", response_class=HTMLResponse)
