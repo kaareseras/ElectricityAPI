@@ -126,6 +126,9 @@ env.bak/
 venv.bak/
 pythonenv*
 
+# FastAPI stuff
+fastapi.db
+
 # Spyder project settings
 .spyderproject
 .spyproject
