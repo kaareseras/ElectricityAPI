@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 from sqlalchemy import Date
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import func
 
 from src.fastapi_app.config.config import get_settings
@@ -148,17 +149,27 @@ async def add_spotprices(data_list, session):
 async def load_spot_prices(data: PriceRequest, session) -> int:
     copenhagen = ZoneInfo("Europe/Copenhagen")
     entries: list[Spotprice] = []
-    for entry in data.multiAreaEntries:
-        hour_utc = entry.deliveryStart
-        hour_dk = hour_utc.astimezone(copenhagen)
-        date_dk = hour_dk.date()
 
-        # Dividing price with 1000 to convert from kr/MWh to kr/kWh
-        for area, price in entry.entryPerArea.items():
-            entries.append(
-                Spotprice(HourUTC=hour_utc, HourDK=hour_dk, DateDK=date_dk, PriceArea=area, SpotpriceDKK=price / 1000)
-            )
+    try:
+        for entry in data.multiAreaEntries:
+            hour_utc = entry.deliveryStart
+            hour_dk = hour_utc.astimezone(copenhagen)
+            date_dk = hour_dk.date()
 
-    session.add_all(entries)
-    session.commit()
-    return len(entries)
+            # Dividing price with 1000 to convert from kr/MWh to kr/kWh
+            for area, price in entry.entryPerArea.items():
+                entries.append(
+                    Spotprice(
+                        HourUTC=hour_utc, HourDK=hour_dk, DateDK=date_dk, PriceArea=area, SpotpriceDKK=price / 1000
+                    )
+                )
+
+        session.add_all(entries)
+        session.commit()
+        return len(entries)
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Data already in database")
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=400, detail=str(e))

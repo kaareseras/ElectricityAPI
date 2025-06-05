@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pytest
-from freezegun import freeze_time
+import time_machine
 from passlib.context import CryptContext
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -26,6 +26,13 @@ from src.fastapi_app.models.tarif import Tarif
 from src.fastapi_app.models.tax import Tax
 from src.fastapi_app.models.user import User
 from src.fastapi_app.services.user import _generate_tokens
+
+
+@pytest.fixture(autouse=True, scope="function")
+def freeze_time():
+    with time_machine.travel("2025-04-01 00:00 +0000", tick=False):
+        yield
+
 
 USER_NAME = "kaare"
 USER_EMAIL = "kaare@seras.dk"
@@ -50,12 +57,6 @@ def user_password():
 engine = create_engine("sqlite:///./fastapi.db")
 SessionTesting = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-@pytest.fixture
-def frozen_time():
-    with freeze_time("2025-01-04T00:00:00"):
-        yield
 
 
 @pytest.fixture(scope="function")
@@ -274,6 +275,7 @@ def spotprice_today(test_session):
     return model
 
 
+@time_machine.travel("2025-04-01 00:00 +0000")
 @pytest.fixture(scope="function")
 def spotprice_tommorow(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
@@ -293,6 +295,7 @@ def spotprice_tommorow(test_session):
     return model
 
 
+@time_machine.travel("2025-04-01 00:00 +0000")
 @pytest.fixture(scope="function")
 def spotprices_for_all_day(test_session):
     copenhagen_tz = ZoneInfo("Europe/Copenhagen")
