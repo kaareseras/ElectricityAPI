@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from fastapi import HTTPException
@@ -31,20 +31,24 @@ def parse_chat_history(chat_history: ChatHistory, history: list[ChatHistoryEleme
 async def get_chat_response(request: ChatRequest):
     dk_timezone = pytz.timezone("Europe/Copenhagen")
     dk_time = datetime.now(dk_timezone).isoformat()
+    dk_end_date = datetime.now(dk_timezone).date()
+
+    _hour = datetime.now(dk_timezone).hour
+    if _hour >= 14:
+        dk_end_date = dk_end_date + timedelta(days=1)
 
     system_message = f"""
         You are a chat bot. And you help users interact with prices on electricity in denmark.
-        You are especially good at answering questions about the taxes and tarifs and current price.
+        You are especially good at answering questions about the taxes and tarifs and current price (spotprice).
         You can call functions to get the information you need.
         current time is {dk_time}
-        When quering for spotprices, always use 'DK1' or 'DK2' as area, depending on the user location.
-        'DK1' is the western part of denmark including fyn, and 'DK2' is the eastern part of denmark.
+        When using spotprices, always use 'DK1' or 'DK2' as area, depending on the user location.
+        'DK1' is the western part of denmark including fyn, and 'DK2' is the eastern part of denmark including Bornholm.
         If your missing information to answer a question, ask the user to provide the information.
         If you don't know the answer, say that you don't know.
         Answer in Danish exept if the user is asking in a different language, then answer in that language.
-        Limit the data gathered to maximum of 5 day for spotprices.
-        Spotprices are only available from 1/4 2025 days and current day.
-        Spotprices is avialable for tomorrow if the time is after 2pm today.
+        Limit the data gathered to maximum of 7 day for spotprices.
+        Spotprices are only available from 1/4 2025 days and til {dk_end_date}.
         """
     kernel, chat_service, settings = get_kernel()
 
