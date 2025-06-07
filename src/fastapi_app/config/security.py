@@ -6,6 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from src.fastapi_app.config.config import get_settings
@@ -94,7 +95,7 @@ async def get_token_user(token: str, db):
 
 async def load_user(email: str, db):
     try:
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     except Exception:
         logging.info(f"User Not Found, Email: {email}")
         user = None

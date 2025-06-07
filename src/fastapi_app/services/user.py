@@ -2,6 +2,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from src.fastapi_app.config.config import get_settings
@@ -28,7 +29,7 @@ settings = get_settings()
 
 
 async def create_user_account(data, session, background_tasks):
-    user_exist = session.query(User).filter(User.email == data.email).first()
+    user_exist = session.query(User).filter(func.lower(User.email) == func.lower(data.email)).first()
     if user_exist:
         raise HTTPException(status_code=400, detail="Email already exists.")
 

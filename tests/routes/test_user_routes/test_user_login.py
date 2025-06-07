@@ -16,6 +16,15 @@ def test_user_login(client, test_session, user, user_password):
     assert response.json()["expires_in"] is not None
 
 
+def test_user_login_uppercase(client, test_session, user, user_password):
+    data = {"username": "Kaare@seras.dk", "password": user_password}
+    response = client.post("/auth/login", data=data)
+    assert response.status_code == 200
+    assert response.json()["access_token"] is not None
+    assert response.json()["refresh_token"] is not None
+    assert response.json()["expires_in"] is not None
+
+
 def test_user_login_wrong_password(client, user, user_password):
     response = client.post("/auth/login", data={"username": user.email, "password": "wrong_password"})
     assert response.status_code == 400

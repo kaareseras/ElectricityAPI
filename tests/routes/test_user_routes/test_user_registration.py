@@ -11,6 +11,12 @@ def test_create_user_with_existing_email(client, inactive_user, user_password):
     assert response.status_code != 201
 
 
+def test_create_user_with_existing_email_uppercase(client, inactive_user, user_password):
+    data = {"name": "Keshari Nandan", "email": "Kaare@seras.dk", "password": user_password}
+    response = client.post("/users/", json=data)
+    assert response.status_code != 201
+
+
 def test_create_user_with_invalid_email(client, user, user_password):
     data = {"name": "Keshari Nandan", "email": "keshari.com", "password": user_password}
     response = client.post("/users/", json=data)
