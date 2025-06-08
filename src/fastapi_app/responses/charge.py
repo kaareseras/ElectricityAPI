@@ -5,7 +5,7 @@ from src.fastapi_app.responses.base import BaseResponse
 
 
 class ChargeResponse(BaseResponse):
-    id: int
+    id: int | None
     chargeowner_id: int
     charge_type: str
     charge_type_code: str

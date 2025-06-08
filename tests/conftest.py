@@ -361,6 +361,47 @@ def charge(test_session, chargeowner):
 
 
 @pytest.fixture(scope="function")
+def charge2(test_session, chargeowner):
+    model = Charge()
+    model.chargeowner_id = chargeowner.id
+    model.charge_type = "Type1"
+    model.charge_type_code = "Code1"
+    model.note = "Another note"
+    model.description = "Another description"
+    model.valid_from = datetime.now(timezone.utc).date() - timedelta(days=1)
+    model.valid_to = datetime.now(timezone.utc).date() + timedelta(days=1)
+    model.price1 = 0.2
+    model.price2 = 0.4
+    model.price3 = 0.6
+    model.price4 = 0.8
+    model.price5 = 1.0
+    model.price6 = 1.2
+    model.price7 = 1.4
+    model.price8 = 1.6
+    model.price9 = 1.8
+    model.price10 = 2.0
+    model.price11 = 2.2
+    model.price12 = 2.4
+    model.price13 = 2.6
+    model.price14 = 2.8
+    model.price15 = 3.0
+    model.price16 = 3.2
+    model.price17 = 3.4
+    model.price18 = 3.6
+    model.price19 = 3.8
+    model.price20 = 4.0
+    model.price21 = 4.2
+    model.price22 = 4.4
+    model.price23 = 4.6
+    model.price24 = 4.8
+    model.created_at = datetime.now(timezone.utc)
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
 def charge_default_end(test_session, chargeowner):
     model = Charge()
     model.chargeowner_id = chargeowner.id

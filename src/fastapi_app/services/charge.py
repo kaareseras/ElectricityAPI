@@ -7,6 +7,7 @@ from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.models.charge import Charge
 from src.fastapi_app.models.chargeowner import Chargeowner
 from src.fastapi_app.responses.charge import ChargeResponse
+from src.fastapi_app.utils.agregate_charge import aggregate_charges
 from src.fastapi_app.utils.chargecompare import compare_charges
 
 settings = get_settings()
@@ -187,14 +188,21 @@ async def fetch_charges_for_date_and_gln(session, qdate, chargeowner_glnnumber):
     if not chargeowner:
         raise HTTPException(status_code=404, detail="Charge owner not found.")
 
-    charge = (
+    charges = (
         session.query(Charge)
         .filter(and_(Charge.valid_from <= qdate, Charge.valid_to > qdate, Charge.chargeowner_id == chargeowner.id))
-        .first()
+        .all()
     )
 
-    if not charge:
+    if not charges:
         raise HTTPException(status_code=404, detail="No charges found.")
+
+    # If there is only one charge, use it directly
+    if len(charges) == 1:
+        charge = charges[0]
+    else:
+        # Aggregate charges if there are multiple charges for the same date and GLN
+        charge = aggregate_charges(charges)
 
     my_charge = ChargeResponse(
         id=charge.id,

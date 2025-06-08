@@ -137,6 +137,28 @@ def test_fetch_charge_by_chargeowner_and_date(client, charge, charge_prev, charg
     assert valid_from <= qdate < valid_to
 
 
+def test_fetch_charge_by_chargeowner_and_date_with_multiple_valid_charges(
+    client, charge, charge2, chargeowner, user, test_session
+):
+    data = _generate_tokens(user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    qdate = datetime.now(UTC).date()
+    chargeowner_gln = chargeowner.glnnumber
+
+    response = client.get(
+        "/charge/date/gln", headers=headers, params={"qdate": qdate, "chargeowner_glnnumber": chargeowner_gln}
+    )
+
+    assert response.status_code == 200
+    assert charge.description in response.json()["description"]
+    assert charge2.description in response.json()["description"]
+    assert response.json()["id"] is None
+    assert response.json()["charge_type"] == charge.charge_type
+    for i in range(1, 25):
+        assert response.json()[f"price{i}"] == getattr(charge, f"price{i}") + getattr(charge2, f"price{i}")
+
+
 def test_fetch_charge_by_chargeowner_and_date_non_chargeowner_found(
     client, charge, charge_prev, chargeowner, user, test_session
 ):
