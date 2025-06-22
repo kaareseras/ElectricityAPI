@@ -23,5 +23,5 @@ numpy>=1.26.4,<1.27.0
 azure-monitor-opentelemetry>=1.0.0,<2.0.0
 python-multipart>=0.0.20
 fastapi-mcp>=0.3.3,<=0.3.4
-semantic-kernel==1.32.0
+semantic-kernel==1.33.0
 time-machine==2.16.0

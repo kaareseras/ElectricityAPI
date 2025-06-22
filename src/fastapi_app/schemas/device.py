@@ -11,3 +11,10 @@ class UpdateDeviceRequest(BaseSchema):
     chargeowner_id: int | None
     PriceArea: str | None
     Config: str | None
+
+
+class AdoptDeviceRequest(BaseSchema):
+    uuid: str
+    name: str | None = None
+    chargeowner_id: int
+    PriceArea: str

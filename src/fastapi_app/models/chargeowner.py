@@ -19,3 +19,4 @@ class Chargeowner(Base):
     is_active = mapped_column(Boolean, default=True)
 
     charges = relationship("Charge", back_populates="chargeowner", cascade="all, delete-orphan", passive_deletes=True)
+    devices = relationship("Device", back_populates="chargeowner")

@@ -7,6 +7,7 @@ from pandas import Timestamp
 from sqlalchemy import Date
 
 from src.fastapi_app.config.config import get_settings
+from src.fastapi_app.models.chargeowner import Chargeowner
 from src.fastapi_app.models.device import Device
 from src.fastapi_app.responses.dayprice import DaypriceResponse, hourPrice
 from src.fastapi_app.services.charge import fetch_charges_for_date_and_gln
@@ -28,10 +29,14 @@ async def fetch_device_details(uuid, session, user):
         "user_id": device.user_id,
         "name": device.name,
         "chargeowner_id": device.chargeowner_id,
-        "PriceArea": device.PriceArea,
-        "Config": device.Config,
+        "price_area": device.price_area,
+        "config": device.config,
         "last_activity": device.last_activity,
         "created_at": device.created_at,
+        "is_adopted": device.is_adopted,
+        "adopted_at": device.adopted_at,
+        "is_blocked": device.is_blocked,
+        "blocked_at": device.blocked_at,
     }
 
 
@@ -46,10 +51,14 @@ async def fetch_devices(session, user):
             "user_id": device.user_id,
             "name": device.name,
             "chargeowner_id": device.chargeowner_id,
-            "PriceArea": device.PriceArea,
-            "Config": device.Config,
+            "price_area": device.price_area,
+            "config": device.config,
             "last_activity": device.last_activity,
             "created_at": device.created_at,
+            "is_adopted": device.is_adopted,
+            "adopted_at": device.adopted_at,
+            "is_blocked": device.is_blocked,
+            "blocked_at": device.blocked_at,
         }
         for device in devices
     ]
@@ -65,21 +74,53 @@ async def delete_device(uuid, session, user):
     return {"message": "Device deleted successfully."}
 
 
-async def add_device(data, session, user):
+async def add_device(uuid: str, session):
     # Check if the device already exists
-    existing = session.get(Device, data.uuid)
+    existing = session.get(Device, uuid)
     if existing:
         raise HTTPException(status_code=404, detail="Device already exists.")
 
     # Add new device
     device = Device(
-        uuid=data.uuid, name=data.uuid, user_id=user.id, last_activity=datetime.now(UTC), created_at=datetime.now(UTC)
+        uuid=uuid,
+        name=uuid,
+        last_activity=datetime.now(UTC),
+        created_at=datetime.now(UTC),
+        is_adopted=False,
+        is_blocked=False,
+        adopted_at=None,
+        blocked_at=None,
     )
     session.add(device)
     session.commit()
     session.refresh(device)
 
-    return await fetch_device_details(device.uuid, session, user)
+    return device
+
+
+async def adopt_device(device_uuid, data, session, user):
+    device = session.query(Device).filter(Device.uuid == device_uuid and Device.user_id == user.id).first()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found.")
+    if device.is_adopted:
+        raise HTTPException(status_code=400, detail="Device already adopted.")
+    chargeowner = session.query(Chargeowner).filter(Chargeowner.id == data.chargeowner_id).first()
+    if not chargeowner:
+        raise HTTPException(status_code=404, detail="Charge owner not found.")
+    if data.PriceArea not in ["DK1", "DK2"]:
+        raise HTTPException(status_code=400, detail="Invalid PriceArea. Must be 'DK1' or 'DK2'.")
+
+    device.name = data.name if data.name else device_uuid
+    device.chargeowner_id = data.chargeowner_id
+    device.PriceArea = data.PriceArea
+    device.uswer_id = user.id
+    device.is_adopted = True
+    device.adopted_at = datetime.now(UTC)
+
+    session.commit()
+    session.refresh(device)
+
+    return device
 
 
 async def update_device(device_uuid, data, session, user):
@@ -118,7 +159,7 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session, user):
     # Fetch device and related data
     device = await fetch_device_details(uuid, session, user)
     chargeowner = await fetch_chargeowner_details(device["chargeowner_id"], session)
-    spotprices = await fetch_spotprices_for_date(session, qdate, device["PriceArea"])
+    spotprices = await fetch_spotprices_for_date(session, qdate, device["price_area"])
     tax = await fetch_tax_by_date(qdate, session)
     tarif = await fetch_tarif_by_date(qdate, session)
     charge = await fetch_charges_for_date_and_gln(session, qdate, chargeowner.glnnumber)

@@ -61,6 +61,9 @@ async def get_chat_response(request: ChatRequest):
         name="prices",
         description="get danish electricity tax prices and spotprices",
         url=mcp_url,
+        # name="dogs",
+        # description="info about dogs",
+        # url="https://apim-demo1306.azure-api.net/petstore-mcp/sse",
     ) as price_plugin:
         kernel.add_plugin(price_plugin)
         result = await chat_service.get_chat_message_content(history, settings, kernel=kernel)

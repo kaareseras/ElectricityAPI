@@ -13,3 +13,7 @@ class DeviceResponse(BaseResponse):
     Config: Union[str, None] = None
     last_activity: Union[str, None, datetime] = None
     created_at: Union[str, None, datetime] = None
+    is_adopted: bool
+    adopted_at: Union[str, None, datetime] = None
+    is_blocked: bool
+    blocked_at: Union[str, None, datetime] = None

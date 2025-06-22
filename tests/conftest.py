@@ -548,8 +548,12 @@ def device(test_session, chargeowner, user):
     model.user_id = user.id
     model.name = "Test Device"
     model.chargeowner_id = chargeowner.id
-    model.PriceArea = "DK2"
-    model.Config = '{"setting1": "value1", "setting2": "value2"}'
+    model.price_area = "DK2"
+    model.config = '{"setting1": "value1", "setting2": "value2"}'
+    model.is_adopted = True
+    model.adopted_at = datetime.now(timezone.utc)
+    model.is_blocked = False
+    model.blocked_at = None
     model.last_activity = datetime.now(timezone.utc)
     model.created_at = datetime.now(timezone.utc)
     test_session.add(model)
@@ -565,8 +569,54 @@ def device2(test_session, chargeowner, user):
     model.user_id = user.id
     model.name = "Test Device 2"
     model.chargeowner_id = chargeowner.id
-    model.PriceArea = "DK2"
-    model.Config = '{"setting1": "value1", "setting2": "value2"}'
+    model.price_area = "DK2"
+    model.config = '{"setting1": "value1", "setting2": "value2"}'
+    model.is_adopted = True
+    model.adopted_at = datetime.now(timezone.utc)
+    model.is_blocked = False
+    model.blocked_at = None
+    model.last_activity = datetime.now(timezone.utc)
+    model.created_at = datetime.now(timezone.utc)
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
+def deviceNotAdopted(test_session, chargeowner, user):
+    model = Device()
+    model.uuid = "1234567890"
+    model.user_id = user.id
+    model.name = "Test Device 2"
+    model.chargeowner_id = chargeowner.id
+    model.price_area = "DK2"
+    model.config = '{"setting1": "value1", "setting2": "value2"}'
+    model.is_adopted = False
+    model.adopted_at = None
+    model.is_blocked = False
+    model.blocked_at = None
+    model.last_activity = datetime.now(timezone.utc)
+    model.created_at = datetime.now(timezone.utc)
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
+def deviceBlocked(test_session, chargeowner, user):
+    model = Device()
+    model.uuid = "1234567890"
+    model.user_id = user.id
+    model.name = "Test Device 2"
+    model.chargeowner_id = chargeowner.id
+    model.price_area = "DK2"
+    model.config = '{"setting1": "value1", "setting2": "value2"}'
+    model.is_adopted = True
+    model.adopted_at = datetime.now(timezone.utc)
+    model.is_blocked = True
+    model.blocked_at = datetime.now(timezone.utc)
     model.last_activity = datetime.now(timezone.utc)
     model.created_at = datetime.now(timezone.utc)
     test_session.add(model)
