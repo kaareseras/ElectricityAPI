@@ -9,12 +9,14 @@ class UpdateDeviceRequest(BaseSchema):
     uuid: str
     name: str | None
     chargeowner_id: int | None
-    PriceArea: str | None
-    Config: str | None
+    price_area: str | None
+    is_electric_heated: bool
+    config: str | None
 
 
 class AdoptDeviceRequest(BaseSchema):
     uuid: str
     name: str | None = None
     chargeowner_id: int
-    PriceArea: str
+    price_area: str
+    is_electric_heated: bool

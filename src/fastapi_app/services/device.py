@@ -30,6 +30,7 @@ async def fetch_device_details(uuid, session, user):
         "name": device.name,
         "chargeowner_id": device.chargeowner_id,
         "price_area": device.price_area,
+        "is_electric_heated": device.is_electric_heated,
         "config": device.config,
         "last_activity": device.last_activity,
         "created_at": device.created_at,
@@ -40,7 +41,7 @@ async def fetch_device_details(uuid, session, user):
     }
 
 
-async def fetch_devices(session, user):
+async def fetch_devices_for_user(session, user):
     devices = session.query(Device).filter(Device.user_id == user.id).all()
     if not devices:
         raise HTTPException(status_code=404, detail="No devices found.")
@@ -52,6 +53,32 @@ async def fetch_devices(session, user):
             "name": device.name,
             "chargeowner_id": device.chargeowner_id,
             "price_area": device.price_area,
+            "is_electric_heated": device.is_electric_heated,
+            "config": device.config,
+            "last_activity": device.last_activity,
+            "created_at": device.created_at,
+            "is_adopted": device.is_adopted,
+            "adopted_at": device.adopted_at,
+            "is_blocked": device.is_blocked,
+            "blocked_at": device.blocked_at,
+        }
+        for device in devices
+    ]
+
+
+async def fetch_devices(session):
+    devices = session.query(Device).all()
+    if not devices:
+        raise HTTPException(status_code=404, detail="No devices found.")
+
+    return [
+        {
+            "uuid": device.uuid,
+            "user_id": device.user_id,
+            "name": device.name,
+            "chargeowner_id": device.chargeowner_id,
+            "price_area": device.price_area,
+            "is_electric_heated": device.is_electric_heated,
             "config": device.config,
             "last_activity": device.last_activity,
             "created_at": device.created_at,
@@ -84,6 +111,7 @@ async def add_device(uuid: str, session):
     device = Device(
         uuid=uuid,
         name=uuid,
+        is_electric_heated=False,
         last_activity=datetime.now(UTC),
         created_at=datetime.now(UTC),
         is_adopted=False,
@@ -107,13 +135,14 @@ async def adopt_device(device_uuid, data, session, user):
     chargeowner = session.query(Chargeowner).filter(Chargeowner.id == data.chargeowner_id).first()
     if not chargeowner:
         raise HTTPException(status_code=404, detail="Charge owner not found.")
-    if data.PriceArea not in ["DK1", "DK2"]:
+    if data.price_area not in ["DK1", "DK2"]:
         raise HTTPException(status_code=400, detail="Invalid PriceArea. Must be 'DK1' or 'DK2'.")
 
     device.name = data.name if data.name else device_uuid
-    device.chargeowner_id = data.chargeowner_id
-    device.PriceArea = data.PriceArea
-    device.uswer_id = user.id
+    device.price_area = data.chargeowner_id
+    device.price_area = data.price_area
+    device.is_electric_heated = data.is_electric_heated
+    device.user_id = user.id
     device.is_adopted = True
     device.adopted_at = datetime.now(UTC)
 
@@ -131,8 +160,9 @@ async def update_device(device_uuid, data, session, user):
     device.uuid = data.uuid
     device.name = data.name
     device.chargeowner_id = data.chargeowner_id
-    device.PriceArea = data.PriceArea
-    device.Config = data.Config
+    device.price_area = data.price_area
+    device.is_electric_heated = data.is_electric_heated
+    device.config = data.config
     device.last_activity = datetime.now(UTC)
     device.updated_at = datetime.now(UTC)
 

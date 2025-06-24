@@ -549,6 +549,7 @@ def device(test_session, chargeowner, user):
     model.name = "Test Device"
     model.chargeowner_id = chargeowner.id
     model.price_area = "DK2"
+    model.is_electric_heated = False
     model.config = '{"setting1": "value1", "setting2": "value2"}'
     model.is_adopted = True
     model.adopted_at = datetime.now(timezone.utc)
@@ -570,6 +571,7 @@ def device2(test_session, chargeowner, user):
     model.name = "Test Device 2"
     model.chargeowner_id = chargeowner.id
     model.price_area = "DK2"
+    model.is_electric_heated = False
     model.config = '{"setting1": "value1", "setting2": "value2"}'
     model.is_adopted = True
     model.adopted_at = datetime.now(timezone.utc)
@@ -591,6 +593,7 @@ def deviceNotAdopted(test_session, chargeowner, user):
     model.name = "Test Device 2"
     model.chargeowner_id = chargeowner.id
     model.price_area = "DK2"
+    model.is_electric_heated = False
     model.config = '{"setting1": "value1", "setting2": "value2"}'
     model.is_adopted = False
     model.adopted_at = None
@@ -612,6 +615,7 @@ def deviceBlocked(test_session, chargeowner, user):
     model.name = "Test Device 2"
     model.chargeowner_id = chargeowner.id
     model.price_area = "DK2"
+    model.is_electric_heated = False
     model.config = '{"setting1": "value1", "setting2": "value2"}'
     model.is_adopted = True
     model.adopted_at = datetime.now(timezone.utc)

@@ -14,7 +14,13 @@ def test_addopt_device(client, user, test_session, chargeowner, deviceNotAdopted
 
     uuid = deviceNotAdopted.uuid
 
-    data = {"uuid": uuid, "name": "name", "chargeowner_id": chargeowner.id, "PriceArea": "DK2"}
+    data = {
+        "uuid": uuid,
+        "name": "name",
+        "chargeowner_id": chargeowner.id,
+        "price_area": "DK2",
+        "is_electric_heated": True,
+    }
 
     response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
 
@@ -22,7 +28,8 @@ def test_addopt_device(client, user, test_session, chargeowner, deviceNotAdopted
     assert response.json()["uuid"] == uuid
     assert response.json()["name"] == data["name"]
     assert response.json()["chargeowner_id"] == data["chargeowner_id"]
-    assert response.json()["PriceArea"] == data["PriceArea"]
+    assert response.json()["price_area"] == data["price_area"]
+    assert response.json()["is_electric_heated"] == data["is_electric_heated"]
 
 
 def test_addopt_device_already_adopted(client, user, test_session, chargeowner, device):
@@ -31,7 +38,13 @@ def test_addopt_device_already_adopted(client, user, test_session, chargeowner, 
 
     uuid = device.uuid
 
-    data = {"uuid": uuid, "name": "name", "chargeowner_id": chargeowner.id, "PriceArea": "DK2"}
+    data = {
+        "uuid": uuid,
+        "name": "name",
+        "chargeowner_id": chargeowner.id,
+        "price_area": "DK2",
+        "is_electric_heated": True,
+    }
 
     response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
 
@@ -43,7 +56,13 @@ def test_addopt_device_while_not_logged_id(client, test_session, chargeowner, de
 
     uuid = deviceNotAdopted.uuid
 
-    data = {"uuid": uuid, "name": "name", "chargeowner_id": chargeowner.id, "PriceArea": "DK2"}
+    data = {
+        "uuid": uuid,
+        "name": "name",
+        "chargeowner_id": chargeowner.id,
+        "price_area": "DK2",
+        "is_electric_heated": True,
+    }
 
     response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
 
@@ -56,7 +75,13 @@ def test_addopt_device_no_chargeowner(client, user, test_session, deviceNotAdopt
 
     uuid = deviceNotAdopted.uuid
 
-    data = {"uuid": uuid, "name": "name", "chargeowner_id": 100, "PriceArea": "DK2"}
+    data = {
+        "uuid": uuid,
+        "name": "name",
+        "chargeowner_id": 100,
+        "price_area": "DK2",
+        "is_electric_heated": True,
+    }
 
     response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
 
@@ -69,7 +94,13 @@ def test_addopt_device_wrong_pricearea(client, user, test_session, chargeowner, 
 
     uuid = deviceNotAdopted.uuid
 
-    data = {"uuid": uuid, "name": "name", "chargeowner_id": chargeowner.id, "PriceArea": "Something_wrong"}
+    data = {
+        "uuid": uuid,
+        "name": "name",
+        "chargeowner_id": chargeowner.id,
+        "price_area": "Something_wrong",
+        "is_electric_heated": True,
+    }
 
     response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
 

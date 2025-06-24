@@ -9,8 +9,9 @@ class DeviceResponse(BaseResponse):
     name: Union[str, None] = None
     user_id: Union[int, None] = None
     chargeowner_id: Union[int, None] = None
-    PriceArea: Union[str, None] = None
-    Config: Union[str, None] = None
+    price_area: Union[str, None] = None
+    is_electric_heated: bool
+    config: Union[str, None] = None
     last_activity: Union[str, None, datetime] = None
     created_at: Union[str, None, datetime] = None
     is_adopted: bool

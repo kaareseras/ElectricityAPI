@@ -18,14 +18,19 @@ def test_update_device(client, device, user, test_session):
         "uuid": device.uuid,
         "name": "Updated Device Name",
         "chargeowner_id": device.chargeowner_id,
-        "PriceArea": "DK2",
-        "Config": '{"setting": "new_value"}',
+        "is_electric_heated": True,
+        "price_area": "DK2",
+        "config": '{"setting": "new_value"}',
     }
 
     response = client.put(f"/device/{device.uuid}", headers=headers, json=updated_device)
 
     assert response.status_code == 200
     assert response.json()["uuid"] is not None
+    assert response.json()["name"] == "Updated Device Name"
+    assert response.json()["chargeowner_id"] == device.chargeowner_id
+    assert response.json()["is_electric_heated"] is True
+    assert response.json()["price_area"] == "DK2"
 
 
 def test_update_device_while_not_logged_in(client, device):

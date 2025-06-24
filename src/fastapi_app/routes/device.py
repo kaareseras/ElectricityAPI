@@ -35,8 +35,13 @@ async def get_device_dayprice(
 
 
 @device_router.get("", status_code=status.HTTP_200_OK, response_model=list[DeviceResponse])
-async def get_all_devices(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
-    return await device.fetch_devices(session, user)
+async def get_all_devices_for_user(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+    return await device.fetch_devices_for_user(session, user)
+
+
+@device_router.get("/all", status_code=status.HTTP_200_OK, response_model=list[DeviceResponse])
+async def get_all_devices(session: Session = Depends(get_db_session), admin=Depends(get_current_admin)):
+    return await device.fetch_devices(session)
 
 
 @device_router.post("/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
