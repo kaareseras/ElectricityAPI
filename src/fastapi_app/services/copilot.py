@@ -44,11 +44,21 @@ async def get_chat_response(request: ChatRequest):
         current time is {dk_time}
         When using spotprices, always use 'DK1' or 'DK2' as area, depending on the user location.
         'DK1' is the western part of denmark including fyn, and 'DK2' is the eastern part of denmark including Bornholm.
+        use this format when quering spotprices: yyyy-mm-dd.
         If your missing information to answer a question, ask the user to provide the information.
         If you don't know the answer, say that you don't know.
         Answer in Danish exept if the user is asking in a different language, then answer in that language.
         Limit the data gathered to maximum of 7 day for spotprices.
         Spotprices are only available from 1/4 2025 days and til {dk_end_date}.
+        When using time, use danish time, and when asked for a day, display all the hours for that day 00-23.
+        When you need to present structured data (like tables), 
+        always respond using proper Markdown syntax. For example, use:
+
+        | Column 1 | Column 2 |
+        |----------|----------|
+        | Row 1    | Value    |
+
+        Do not use HTML. Just respond using Markdown format.
         """
     kernel, chat_service, settings = get_kernel()
 

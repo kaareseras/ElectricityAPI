@@ -12,9 +12,8 @@ Functions:
 
 from src.fastapi_app.services.user import _generate_tokens
 
+
 # Test for fetching device by ID
-
-
 def test_fetch_device(client, device, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
@@ -26,9 +25,32 @@ def test_fetch_device(client, device, user, test_session):
 
 
 # Test for fetching all devices
+def test_fetch_all_devices(client, device, device2, admin_user, test_session):
+    data = _generate_tokens(admin_user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    response = client.get("/device/all", headers=headers)
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+    for dev in response.json():
+        assert dev.get("name") is not None
+        assert dev.get("user_id") is not None
 
 
-def test_fetch_all_devices(client, device, device2, user, test_session):
+# Test for fetching all devices with non admin user
+def test_fetch_all_devices_not_admin(client, device, device2, user, test_session):
+    data = _generate_tokens(user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    response = client.get("/device/all", headers=headers)
+
+    assert response.status_code == 403
+
+
+# Test for fetching all devices for specific user
+def test_fetch_all_devices_for_user(client, device, device2, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
