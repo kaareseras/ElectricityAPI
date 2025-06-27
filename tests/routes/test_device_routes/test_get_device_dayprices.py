@@ -25,3 +25,18 @@ def test_get_device_dayprices_success(
 
     assert response.status_code == 200
     assert response.json()["uuid"] is not None
+
+
+def test_get_device_dayprices_not_logged_in(
+    client, device, spotprices_for_all_day, tax, tarif, charge, chargeowner, test_session
+):
+    headers = {}
+
+    uuid = device.uuid
+    copenhagen_tz = ZoneInfo("Europe/Copenhagen")
+    qdate = datetime.now(copenhagen_tz).strftime("%Y-%m-%d")
+
+    response = client.get("/device/dayprices", headers=headers, params={"qdate": qdate, "uuid": uuid})
+
+    assert response.status_code == 200
+    assert response.json()["uuid"] is not None

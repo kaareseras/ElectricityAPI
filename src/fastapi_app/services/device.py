@@ -41,6 +41,35 @@ async def fetch_device_details(uuid, session, user):
     }
 
 
+"""
+Only user is needed to fetch device details without user context.
+This is useful for admin operations or when the user context is not available 
+like when a device is requesting its prices.
+"""
+
+
+async def fetch_device_details_no_user(uuid, session):
+    device = session.query(Device).filter(Device.uuid == uuid).first()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
+    return {
+        "uuid": device.uuid,
+        "user_id": device.user_id,
+        "name": device.name,
+        "chargeowner_id": device.chargeowner_id,
+        "price_area": device.price_area,
+        "is_electric_heated": device.is_electric_heated,
+        "config": device.config,
+        "last_activity": device.last_activity,
+        "created_at": device.created_at,
+        "is_adopted": device.is_adopted,
+        "adopted_at": device.adopted_at,
+        "is_blocked": device.is_blocked,
+        "blocked_at": device.blocked_at,
+    }
+
+
 async def fetch_devices_for_user(session, user):
     devices = session.query(Device).filter(Device.user_id == user.id).all()
     if not devices:
@@ -172,7 +201,7 @@ async def update_device(device_uuid, data, session, user):
     return await fetch_device_details(device.uuid, session, user)
 
 
-async def fetch_device_dayprice(uuid: str, qdate: Date, session, user):
+async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     # Set Danish timezone
     tz = ZoneInfo("Europe/Copenhagen")
 
@@ -187,7 +216,7 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session, user):
     hour_range = pd.date_range(start=start.date(), periods=24, freq="h")
 
     # Fetch device and related data
-    device = await fetch_device_details(uuid, session, user)
+    device = await fetch_device_details_no_user(uuid, session)
     chargeowner = await fetch_chargeowner_details(device["chargeowner_id"], session)
     spotprices = await fetch_spotprices_for_date(session, qdate, device["price_area"])
     tax = await fetch_tax_by_date(qdate, session)
