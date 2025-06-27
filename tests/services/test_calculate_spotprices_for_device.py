@@ -16,7 +16,7 @@ async def test_fetch_device_dayprice_structure(
     test_date = datetime.now(copenhagen_tz)
 
     # Act
-    result = await fetch_device_dayprice(device.uuid, test_date, test_session, user)
+    result = await fetch_device_dayprice(device.uuid, test_date, test_session)
     prices = result.prices
 
     # Assert: Should be 24 hourly entries
