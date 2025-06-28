@@ -168,7 +168,7 @@ async def adopt_device(device_uuid, data, session, user):
         raise HTTPException(status_code=400, detail="Invalid PriceArea. Must be 'DK1' or 'DK2'.")
 
     device.name = data.name if data.name else device_uuid
-    device.price_area = data.chargeowner_id
+    device.chargeowner_id = data.chargeowner_id
     device.price_area = data.price_area
     device.is_electric_heated = data.is_electric_heated
     device.user_id = user.id

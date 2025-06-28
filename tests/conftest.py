@@ -587,14 +587,15 @@ def device2(test_session, chargeowner, user):
 
 @pytest.fixture(scope="function")
 def deviceNotAdopted(test_session, chargeowner, user):
+    uuid = "1234567890"
     model = Device()
-    model.uuid = "1234567890"
-    model.user_id = user.id
-    model.name = "Test Device 2"
-    model.chargeowner_id = chargeowner.id
-    model.price_area = "DK2"
+    model.uuid = uuid
+    model.user_id = None
+    model.name = uuid
+    model.chargeowner_id = None
+    model.price_area = None
     model.is_electric_heated = False
-    model.config = '{"setting1": "value1", "setting2": "value2"}'
+    model.config = None
     model.is_adopted = False
     model.adopted_at = None
     model.is_blocked = False
