@@ -229,6 +229,8 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     # Create DataFrame from spot prices
     spotprice_df = pd.DataFrame([{"HourDK": sp.HourDK, "SpotPrice": sp.SpotpriceDKK} for sp in spotprices])
 
+    print(spotprice_df)
+
     # Ensure HourDK is timezone-aware and in correct tz
     spotprice_df["HourDK"] = pd.to_datetime(spotprice_df["HourDK"])
 
@@ -286,11 +288,11 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     # Build response
     _prices = [
         hourPrice(
-            hour=row["HourDK"],
-            totalprice=row["TotalPrice"],
-            spotprice=row["SpotPrice"],
-            isMax=(row["TotalPrice"] == max_price).item(),
-            isMin=(row["TotalPrice"] == min_price).item(),
+            hour=row["HourDK"].to_pydatetime() if hasattr(row["HourDK"], "to_pydatetime") else row["HourDK"],
+            totalprice=float(row["TotalPrice"]),
+            spotprice=float(row["SpotPrice"]),
+            isMax=bool(row["TotalPrice"] == max_price),
+            isMin=bool(row["TotalPrice"] == min_price),
         )
         for _, row in df.iterrows()
     ]

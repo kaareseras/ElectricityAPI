@@ -55,7 +55,10 @@ async def delete_all_spotprices(session):
 async def add_spotprice(data, session):
     spotprice = Spotprice()
     spotprice.HourUTC = datetime.strptime(data.HourUTC, "%Y-%m-%dT%H:%M:%S")
-    spotprice.HourDK = datetime.strptime(data.HourDK, "%Y-%m-%dT%H:%M:%S")
+    copenhagen_tz = ZoneInfo("Europe/Copenhagen")
+    spotprice.HourDK = (
+        datetime.strptime(data.HourDK, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(copenhagen_tz)
+    )
     spotprice.DateDK = spotprice.HourDK.date()
     spotprice.PriceArea = data.PriceArea
     spotprice.SpotpriceDKK = data.SpotpriceDKK
