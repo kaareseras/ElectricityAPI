@@ -155,8 +155,20 @@ async def load_spot_prices(data: PriceRequest, session) -> int:
 
     try:
         for entry in data.multiAreaEntries:
+            # Make sure deliveryStart is aware (UTC)
             hour_utc = entry.deliveryStart
-            hour_dk = hour_utc.astimezone(copenhagen)
+            if hour_utc.tzinfo is None:
+                hour_utc = hour_utc.replace(tzinfo=timezone.utc)
+
+            # Convert to DK time (aware)
+            hour_dk_aware = hour_utc.astimezone(copenhagen)
+
+            # Drop tzinfo to match TIMESTAMP WITHOUT TIME ZONE
+            hour_dk_naive = hour_dk_aware.replace(tzinfo=None)
+
+            # Save both
+            hour_utc = hour_utc.replace(tzinfo=None)  # If your HourUTC is also without timezone
+            hour_dk = hour_dk_naive
             date_dk = hour_dk.date()
 
             # Dividing price with 1000 to convert from kr/MWh to kr/kWh
