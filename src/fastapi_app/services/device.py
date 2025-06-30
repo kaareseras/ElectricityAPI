@@ -229,8 +229,6 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     # Create DataFrame from spot prices
     spotprice_df = pd.DataFrame([{"HourDK": sp.HourDK, "SpotPrice": sp.SpotpriceDKK} for sp in spotprices])
 
-    print(spotprice_df)
-
     # Ensure HourDK is timezone-aware and in correct tz
     spotprice_df["HourDK"] = pd.to_datetime(spotprice_df["HourDK"])
 
@@ -278,8 +276,12 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     df["NetTarif"] = tarif.nettarif * (1.25 if not tarif.includingVAT else 1)
     df["SystemTarif"] = tarif.systemtarif * (1.25 if not tarif.includingVAT else 1)
 
-    # Calculate total price
-    df["TotalPrice"] = (df["SpotPrice"] + df["Charge"] + df["Tax"] + df["NetTarif"] + df["SystemTarif"]).round(3)
+    # Calculate total price and add VAT for Spotprice and charge
+    df["TotalPrice"] = (
+        df["SpotPrice"] * 1.25 + df["Charge"] * 1.25 + df["Tax"] + df["NetTarif"] + df["SystemTarif"]
+    ).round(3)
+
+    print(df)
 
     # Find max/min for flagging
     max_price = df["TotalPrice"].max()
