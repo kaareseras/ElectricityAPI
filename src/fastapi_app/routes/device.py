@@ -26,9 +26,12 @@ async def get_device_info(uuid: str, session: Session = Depends(get_db_session),
 @device_router.get("/dayprices", status_code=status.HTTP_200_OK, response_model=DaypriceResponse)
 async def get_device_dayprice(
     uuid: str,
-    qdate: datetime = datetime.now().astimezone().date(),
+    qdate: datetime = None,
     session: Session = Depends(get_db_session),
 ):
+    if qdate is None:
+        qdate = datetime.now().astimezone().date()
+
     logging.info(f"Fetching dayprice for device {uuid} on {qdate}")
     return await device.fetch_device_dayprice(uuid, qdate, session)
 

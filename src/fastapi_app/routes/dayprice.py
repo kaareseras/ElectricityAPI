@@ -18,6 +18,8 @@ device_router = APIRouter(
 async def get_device_info(
     uuid: str,
     session: Session = Depends(get_db_session),
-    qdate: datetime = datetime.now().date,
+    qdate: datetime = None,
 ):
+    if qdate is None:
+        qdate = datetime.now().astimezone().date()
     return await device.fetch_device_dayprice(uuid, qdate, session)
