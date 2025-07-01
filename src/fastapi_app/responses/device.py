@@ -12,6 +12,8 @@ class DeviceResponse(BaseResponse):
     price_area: Union[str, None] = None
     is_electric_heated: bool
     config: Union[str, None] = None
+    devicetype_id: int
+    retail_markup: float | None = None
     last_activity: Union[str, None, datetime] = None
     created_at: Union[str, None, datetime] = None
     is_adopted: bool

@@ -10,6 +10,7 @@ from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.models.chargeowner import Chargeowner
 from src.fastapi_app.models.device import Device
 from src.fastapi_app.responses.dayprice import DaypriceResponse, hourPrice
+from src.fastapi_app.schemas.device import AddDeviceRequest, AdoptDeviceRequest
 from src.fastapi_app.services.charge import fetch_charges_for_date_and_gln
 from src.fastapi_app.services.chargeowner import fetch_chargeowner_details
 from src.fastapi_app.services.spotprice import fetch_spotprices_for_date
@@ -32,6 +33,8 @@ async def fetch_device_details(uuid, session, user):
         "price_area": device.price_area,
         "is_electric_heated": device.is_electric_heated,
         "config": device.config,
+        "devicetype_id": device.devicetype_id,
+        "retail_markup": device.retail_markup,
         "last_activity": device.last_activity,
         "created_at": device.created_at,
         "is_adopted": device.is_adopted,
@@ -61,6 +64,8 @@ async def fetch_device_details_no_user(uuid, session):
         "price_area": device.price_area,
         "is_electric_heated": device.is_electric_heated,
         "config": device.config,
+        "devicetype_id": device.devicetype_id,
+        "retail_markup": device.retail_markup,
         "last_activity": device.last_activity,
         "created_at": device.created_at,
         "is_adopted": device.is_adopted,
@@ -84,6 +89,8 @@ async def fetch_devices_for_user(session, user):
             "price_area": device.price_area,
             "is_electric_heated": device.is_electric_heated,
             "config": device.config,
+            "devicetype_id": device.devicetype_id,
+            "retail_markup": device.retail_markup,
             "last_activity": device.last_activity,
             "created_at": device.created_at,
             "is_adopted": device.is_adopted,
@@ -109,6 +116,8 @@ async def fetch_devices(session):
             "price_area": device.price_area,
             "is_electric_heated": device.is_electric_heated,
             "config": device.config,
+            "devicetype_id": device.devicetype_id,
+            "retail_markup": device.retail_markup,
             "last_activity": device.last_activity,
             "created_at": device.created_at,
             "is_adopted": device.is_adopted,
@@ -130,17 +139,17 @@ async def delete_device(uuid, session, user):
     return {"message": "Device deleted successfully."}
 
 
-async def add_device(uuid: str, session):
+async def add_device(data: AddDeviceRequest, session):
     # Check if the device already exists
-    existing = session.get(Device, uuid)
+    existing = session.get(Device, data.uuid)
     if existing:
         raise HTTPException(status_code=404, detail="Device already exists.")
 
     # Add new device
     device = Device(
-        uuid=uuid,
-        name=uuid,
-        is_electric_heated=False,
+        uuid=data.uuid,
+        name=data.name,
+        is_electric_heated=data.is_electric_heated,
         last_activity=datetime.now(UTC),
         created_at=datetime.now(UTC),
         is_adopted=False,
@@ -155,8 +164,8 @@ async def add_device(uuid: str, session):
     return device
 
 
-async def adopt_device(device_uuid, data, session, user):
-    device = session.query(Device).filter(Device.uuid == device_uuid and Device.user_id == user.id).first()
+async def adopt_device(data: AdoptDeviceRequest, session, user):
+    device = session.query(Device).filter(Device.uuid == data.uuid and Device.user_id == user.id).first()
     if not device:
         raise HTTPException(status_code=404, detail="Device not found.")
     if device.is_adopted:
@@ -167,7 +176,7 @@ async def adopt_device(device_uuid, data, session, user):
     if data.price_area not in ["DK1", "DK2"]:
         raise HTTPException(status_code=400, detail="Invalid PriceArea. Must be 'DK1' or 'DK2'.")
 
-    device.name = data.name if data.name else device_uuid
+    device.name = data.name if data.name else device.uuid
     device.chargeowner_id = data.chargeowner_id
     device.price_area = data.price_area
     device.is_electric_heated = data.is_electric_heated
@@ -192,6 +201,8 @@ async def update_device(device_uuid, data, session, user):
     device.price_area = data.price_area
     device.is_electric_heated = data.is_electric_heated
     device.config = data.config
+    device.devicetype_id = data.devicetype_id
+    device.retail_markup = data.retail_markup if data.retail_markup is not None else device.retail_markup
     device.last_activity = datetime.now(UTC)
     device.updated_at = datetime.now(UTC)
 

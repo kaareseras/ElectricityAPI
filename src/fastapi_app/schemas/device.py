@@ -3,6 +3,7 @@ from src.fastapi_app.schemas.base import BaseSchema
 
 class AddDeviceRequest(BaseSchema):
     uuid: str
+    devicetype_id: int
 
 
 class UpdateDeviceRequest(BaseSchema):
@@ -12,6 +13,8 @@ class UpdateDeviceRequest(BaseSchema):
     price_area: str | None
     is_electric_heated: bool
     config: str | None
+    devicetype_id: int
+    retail_markup: float | None = None
 
 
 class AdoptDeviceRequest(BaseSchema):
@@ -20,3 +23,5 @@ class AdoptDeviceRequest(BaseSchema):
     chargeowner_id: int
     price_area: str
     is_electric_heated: bool
+    devicetype_id: int
+    retail_markup: float | None = None

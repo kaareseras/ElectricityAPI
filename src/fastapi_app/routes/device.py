@@ -8,7 +8,7 @@ from src.fastapi_app.config.database import get_db_session
 from src.fastapi_app.config.security import get_current_admin, get_current_user
 from src.fastapi_app.responses.dayprice import DaypriceResponse
 from src.fastapi_app.responses.device import DeviceResponse
-from src.fastapi_app.schemas.device import AdoptDeviceRequest, UpdateDeviceRequest
+from src.fastapi_app.schemas.device import AddDeviceRequest, AdoptDeviceRequest, UpdateDeviceRequest
 from src.fastapi_app.services import device
 
 device_router = APIRouter(
@@ -46,16 +46,18 @@ async def get_all_devices(session: Session = Depends(get_db_session), admin=Depe
     return await device.fetch_devices(session)
 
 
-@device_router.post("/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
-async def add_new_device(uuid: str, session: Session = Depends(get_db_session), admin=Depends(get_current_admin)):
-    return await device.add_device(uuid, session)
-
-
-@device_router.post("/adopt/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
-async def adopt_device(
-    uuid: str, data: AdoptDeviceRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)
+@device_router.post("/", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
+async def add_new_device(
+    data: AddDeviceRequest, session: Session = Depends(get_db_session), admin=Depends(get_current_admin)
 ):
-    return await device.adopt_device(uuid, data, session, user)
+    return await device.add_device(data, session)
+
+
+@device_router.post("/adopt/", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
+async def adopt_device(
+    data: AdoptDeviceRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)
+):
+    return await device.adopt_device(data, session, user)
 
 
 @device_router.put("/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
