@@ -20,6 +20,8 @@ def test_update_device(client, device, user, test_session):
         "chargeowner_id": device.chargeowner_id,
         "is_electric_heated": True,
         "price_area": "DK2",
+        "devicetype_id": device.devicetype_id,
+        "retail_markup": 0.2,
         "config": '{"setting": "new_value"}',
     }
 
@@ -31,6 +33,9 @@ def test_update_device(client, device, user, test_session):
     assert response.json()["chargeowner_id"] == device.chargeowner_id
     assert response.json()["is_electric_heated"] is True
     assert response.json()["price_area"] == "DK2"
+    assert response.json()["devicetype_id"] == device.devicetype_id
+    assert response.json()["retail_markup"] == 0.2
+    assert response.json()["config"] == '{"setting": "new_value"}'
 
 
 def test_update_device_while_not_logged_in(client, device):

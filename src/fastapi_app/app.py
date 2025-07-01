@@ -12,7 +12,19 @@ from fastapi.templating import Jinja2Templates
 from fastapi_mcp import FastApiMCP
 
 from src.fastapi_app.config.config import get_settings
-from src.fastapi_app.routes import admin, charge, chargeowner, copilot, device, spotprice, tarif, tax, user, watermark
+from src.fastapi_app.routes import (
+    admin,
+    charge,
+    chargeowner,
+    copilot,
+    device,
+    devicetype,
+    spotprice,
+    tarif,
+    tax,
+    user,
+    watermark,
+)
 
 config = get_settings()
 
@@ -35,6 +47,7 @@ def create_application():
     application.include_router(tax.tax_router)
     application.include_router(tarif.tarif_router)
     application.include_router(device.device_router)
+    application.include_router(devicetype.devicetype_router)
     application.include_router(copilot.copilot_router)
     application.include_router(watermark.watermark_router)
 

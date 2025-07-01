@@ -18,7 +18,7 @@ def test_fetch_device(client, device, user, test_session):
     data = _generate_tokens(user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
-    response = client.get(f"/device/uuid/{device.uuid}", headers=headers)
+    response = client.get(f"/device/{device.uuid}", headers=headers)
 
     assert response.status_code == 200
     assert response.json()["uuid"] == device.uuid
@@ -79,6 +79,6 @@ def test_fetch_device_with_wrong_id(client, device, user, test_session):
 
 
 def test_fetch_device_while_not_logged_in(client, device):
-    response = client.get(f"/device/uuid/{device.uuid}")
+    response = client.get(f"/device/{device.uuid}")
 
     assert response.status_code == 401

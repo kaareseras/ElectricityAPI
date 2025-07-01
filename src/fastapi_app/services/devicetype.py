@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from sqlalchemy import and_
 
 from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.models.devicetype import DeviceType
@@ -74,32 +73,32 @@ async def delete_devicetype(pk, session):
     return {"message": "DeviceType deleted successfully."}
 
 
-async def upsert_devicetype(data, session):
-    new_devicetype = DeviceType()
-    new_devicetype.name = data.name
-    new_devicetype.hw_version = data.hw_version
-    new_devicetype.sw_version = data.sw_version
-    new_devicetype.sw_date = data.sw_date
+async def insert_devicetype(data, session):
+    existing_devicetype = session.query(DeviceType).filter(DeviceType.name == data.name).first()
+    if existing_devicetype:
+        raise HTTPException(status_code=400, detail="DeviceType with this name already exists.")
 
-    existing_devicetype = (
-        session.query(DeviceType)
-        .filter(
-            and_(
-                DeviceType.name == data.name,
-                DeviceType.hw_version == data.hw_version,
-                DeviceType.sw_version == data.sw_version,
-            )
-        )
-        .first()
+    new_devicetype = DeviceType(
+        name=data.name,
+        hw_version=data.hw_version,
+        sw_version=data.sw_version,
+        sw_date=data.sw_date,
     )
+    session.add(new_devicetype)
+    session.commit()
+    session.refresh(new_devicetype)
+    return await fetch_devicetype_details(new_devicetype.id, session)
 
-    if not existing_devicetype:
-        session.add(new_devicetype)
-        session.commit()
-        session.refresh(new_devicetype)
-        return await fetch_devicetype_details(new_devicetype.id, session)
-    else:
-        # Optionally update fields if you want to allow updates
-        existing_devicetype.sw_date = data.sw_date
-        session.commit()
-        return await fetch_devicetype_details(existing_devicetype.id, session)
+
+async def update_devicetype(device_type_id, data, session):
+    devicetype = session.query(DeviceType).filter(DeviceType.id == device_type_id).first()
+    if not devicetype:
+        raise HTTPException(status_code=404, detail="DeviceType not found.")
+
+    devicetype.name = data.name
+    devicetype.hw_version = data.hw_version
+    devicetype.sw_version = data.sw_version
+    devicetype.sw_date = data.sw_date
+
+    session.commit()
+    return await fetch_devicetype_details(devicetype.id, session)

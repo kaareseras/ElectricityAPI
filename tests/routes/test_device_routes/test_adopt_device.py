@@ -20,9 +20,10 @@ def test_addopt_device(client, user, test_session, chargeowner, deviceNotAdopted
         "chargeowner_id": chargeowner.id,
         "price_area": "DK2",
         "is_electric_heated": True,
+        "retail_markup": 0.4,
     }
 
-    response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
+    response = client.post("/device/adopt", headers=headers, json=data)
 
     assert response.status_code == 200
     assert response.json()["uuid"] == uuid
@@ -30,6 +31,7 @@ def test_addopt_device(client, user, test_session, chargeowner, deviceNotAdopted
     assert response.json()["chargeowner_id"] == data["chargeowner_id"]
     assert response.json()["price_area"] == data["price_area"]
     assert response.json()["is_electric_heated"] == data["is_electric_heated"]
+    assert response.json()["retail_markup"] == data["retail_markup"]
 
 
 def test_addopt_device_already_adopted(client, user, test_session, chargeowner, device):
@@ -44,9 +46,10 @@ def test_addopt_device_already_adopted(client, user, test_session, chargeowner, 
         "chargeowner_id": chargeowner.id,
         "price_area": "DK2",
         "is_electric_heated": True,
+        "retail_markup": 0.4,
     }
 
-    response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
+    response = client.post("/device/adopt", headers=headers, json=data)
 
     assert response.status_code == 400
 
@@ -62,9 +65,10 @@ def test_addopt_device_while_not_logged_id(client, test_session, chargeowner, de
         "chargeowner_id": chargeowner.id,
         "price_area": "DK2",
         "is_electric_heated": True,
+        "retail_markup": 0.4,
     }
 
-    response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
+    response = client.post("/device/adopt", headers=headers, json=data)
 
     assert response.status_code == 401
 
@@ -78,12 +82,13 @@ def test_addopt_device_no_chargeowner(client, user, test_session, deviceNotAdopt
     data = {
         "uuid": uuid,
         "name": "name",
-        "chargeowner_id": 100,
+        "chargeowner_id": -1,
         "price_area": "DK2",
         "is_electric_heated": True,
+        "retail_markup": 0.4,
     }
 
-    response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
+    response = client.post("/device/adopt", headers=headers, json=data)
 
     assert response.status_code == 404
 
@@ -98,10 +103,11 @@ def test_addopt_device_wrong_pricearea(client, user, test_session, chargeowner, 
         "uuid": uuid,
         "name": "name",
         "chargeowner_id": chargeowner.id,
-        "price_area": "Something_wrong",
+        "price_area": "DK3",
         "is_electric_heated": True,
+        "retail_markup": 0.4,
     }
 
-    response = client.post(f"/device/adopt/{uuid}", headers=headers, json=data)
+    response = client.post("/device/adopt", headers=headers, json=data)
 
     assert response.status_code == 400

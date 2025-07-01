@@ -18,11 +18,6 @@ device_router = APIRouter(
 )
 
 
-@device_router.get("/uuid/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
-async def get_device_info(uuid: str, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
-    return await device.fetch_device_details(uuid, session, user)
-
-
 @device_router.get("/dayprices", status_code=status.HTTP_200_OK, response_model=DaypriceResponse)
 async def get_device_dayprice(
     uuid: str,
@@ -36,14 +31,19 @@ async def get_device_dayprice(
     return await device.fetch_device_dayprice(uuid, qdate, session)
 
 
-@device_router.get("", status_code=status.HTTP_200_OK, response_model=list[DeviceResponse])
-async def get_all_devices_for_user(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+@device_router.get("/", status_code=status.HTTP_200_OK, response_model=list[DeviceResponse])
+async def get_devices_for_user(session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await device.fetch_devices_for_user(session, user)
 
 
 @device_router.get("/all", status_code=status.HTTP_200_OK, response_model=list[DeviceResponse])
 async def get_all_devices(session: Session = Depends(get_db_session), admin=Depends(get_current_admin)):
     return await device.fetch_devices(session)
+
+
+@device_router.get("/{uuid}", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
+async def get_device_info(uuid: str, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+    return await device.fetch_device_details(uuid, session, user)
 
 
 @device_router.post("/", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
@@ -53,7 +53,7 @@ async def add_new_device(
     return await device.add_device(data, session)
 
 
-@device_router.post("/adopt/", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
+@device_router.post("/adopt", status_code=status.HTTP_200_OK, response_model=DeviceResponse)
 async def adopt_device(
     data: AdoptDeviceRequest, session: Session = Depends(get_db_session), user=Depends(get_current_user)
 ):

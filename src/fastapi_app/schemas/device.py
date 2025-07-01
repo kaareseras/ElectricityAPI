@@ -23,5 +23,4 @@ class AdoptDeviceRequest(BaseSchema):
     chargeowner_id: int
     price_area: str
     is_electric_heated: bool
-    devicetype_id: int
     retail_markup: float | None = None

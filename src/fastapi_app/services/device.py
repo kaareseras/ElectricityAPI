@@ -77,8 +77,6 @@ async def fetch_device_details_no_user(uuid, session):
 
 async def fetch_devices_for_user(session, user):
     devices = session.query(Device).filter(Device.user_id == user.id).all()
-    if not devices:
-        raise HTTPException(status_code=404, detail="No devices found.")
 
     return [
         {
@@ -148,8 +146,14 @@ async def add_device(data: AddDeviceRequest, session):
     # Add new device
     device = Device(
         uuid=data.uuid,
-        name=data.name,
-        is_electric_heated=data.is_electric_heated,
+        name=data.uuid,
+        user_id=None,  # Initially no user is assigned
+        chargeowner_id=None,
+        price_area=None,
+        devicetype_id=data.devicetype_id,
+        config=None,
+        retail_markup=None,
+        is_electric_heated=False,
         last_activity=datetime.now(UTC),
         created_at=datetime.now(UTC),
         is_adopted=False,
@@ -180,6 +184,7 @@ async def adopt_device(data: AdoptDeviceRequest, session, user):
     device.chargeowner_id = data.chargeowner_id
     device.price_area = data.price_area
     device.is_electric_heated = data.is_electric_heated
+    device.retail_markup = data.retail_markup if data.retail_markup is not None else settings.default_retail_markup
     device.user_id = user.id
     device.is_adopted = True
     device.adopted_at = datetime.now(UTC)
