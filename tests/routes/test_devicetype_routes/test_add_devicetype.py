@@ -28,8 +28,8 @@ def test_add_devicetype_not_admin(client, user, test_session):
     assert response.status_code == 403
 
 
-def test_add_devicetype_with_existing_name(client, devicetype, user, test_session):
-    data = _generate_tokens(user, test_session)
+def test_add_devicetype_with_existing_name(client, devicetype, admin_user, test_session):
+    data = _generate_tokens(admin_user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
     new_devicetype = {"name": devicetype.name, "hw_version": "1.0", "sw_version": "2.0", "sw_date": "2025-01-04"}
@@ -49,8 +49,8 @@ def test_add_devicetype_while_not_logged_in(client, test_session):
     assert response.status_code == 401
 
 
-def test_add_devicetype_with_missing_data(client, user, test_session):
-    data = _generate_tokens(user, test_session)
+def test_add_devicetype_with_missing_data(client, admin_user, test_session):
+    data = _generate_tokens(admin_user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
     new_devicetype = {

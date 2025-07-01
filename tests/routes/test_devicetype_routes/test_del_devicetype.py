@@ -26,8 +26,8 @@ def test_delete_devicetype_not_admin(client, devicetype, user, test_session):
     assert response.status_code == 403
 
 
-def test_delete_devicetype_not_existing(client, user, test_session):
-    data = _generate_tokens(user, test_session)
+def test_delete_devicetype_not_existing(client, admin_user, test_session):
+    data = _generate_tokens(admin_user, test_session)
     headers = {"Authorization": f"Bearer {data['access_token']}"}
 
     response = client.delete("/devicetype/-1", headers=headers)
