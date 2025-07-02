@@ -292,9 +292,25 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
     df["NetTarif"] = tarif.nettarif * (1.25 if not tarif.includingVAT else 1)
     df["SystemTarif"] = tarif.systemtarif * (1.25 if not tarif.includingVAT else 1)
 
+    if device["retail_markup"] is not None:
+        # Apply retail markup if available
+        df["Retail_markup"] = device["retail_markup"]
+    else:
+        # Default retail markup if not set
+        df["Retail_markup"] = 0
+
+    if device["is_electric_heated"]:
+        # If the device is electric heated, apply a 25% markup on the spot price
+        df["Tax"] = 0.008
+
     # Calculate total price and add VAT for Spotprice and charge
     df["TotalPrice"] = (
-        df["SpotPrice"] * 1.25 + df["Charge"] * 1.25 + df["Tax"] + df["NetTarif"] + df["SystemTarif"]
+        df["SpotPrice"] * 1.25
+        + df["Charge"] * 1.25
+        + df["Tax"]
+        + df["NetTarif"]
+        + df["SystemTarif"]
+        + df["Retail_markup"]
     ).round(3)
 
     print(df)
