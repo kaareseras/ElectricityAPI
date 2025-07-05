@@ -1,0 +1,94 @@
+from fastapi import HTTPException
+
+from src.fastapi_app.config.config import get_settings
+from src.fastapi_app.models.hardware import Hardware
+from src.fastapi_app.responses.hardware import HardwareResponse
+
+settings = get_settings()
+
+
+async def fetch_hardware_details(hardware_id, session):
+    hardware = session.query(Hardware).filter(Hardware.id == hardware_id).first()
+    _error = ""
+    if not hardware:
+        raise HTTPException(status_code=404, detail="Hardware not found.")
+
+    my_hardware = HardwareResponse(
+        id=hardware.id,
+        devicetype_id=hardware.devicetype_id,
+        version=hardware.version,
+        name=hardware.name,
+        description=hardware.description,
+        created_at=hardware.created_at,
+        is_active=hardware.is_active,
+        error=_error,
+    )
+
+    return my_hardware
+
+
+async def fetch_hardwares(session):
+    hardwares = session.query(Hardware).order_by(Hardware.created_at.desc()).all()
+
+    my_hardwares = []
+    for hardware in hardwares:
+        my_hardware = HardwareResponse(
+            id=hardware.id,
+            devicetype_id=hardware.devicetype_id,
+            version=hardware.version,
+            name=hardware.name,
+            description=hardware.description,
+            created_at=hardware.created_at,
+            is_active=hardware.is_active,
+        )
+        my_hardwares.append(my_hardware)
+
+    return my_hardwares
+
+
+async def delete_hardware(pk, session):
+    hardware = session.query(Hardware).filter(Hardware.id == pk).first()
+    if not hardware:
+        raise HTTPException(status_code=404, detail="Hardware not found.")
+    session.delete(hardware)
+    session.commit()
+    return {"message": "Hardware deleted successfully."}
+
+
+async def insert_hardware(data, session):
+    existing_hardware = (
+        session.query(Hardware)
+        .filter(Hardware.version == data.version, Hardware.devicetype_id == data.devicetype_id)
+        .first()
+    )
+    if existing_hardware:
+        raise HTTPException(status_code=400, detail="Hardware with this version for the device type already exists.")
+
+    new_hardware = Hardware(
+        devicetype_id=data.devicetype_id,
+        version=data.version,
+        name=data.name,
+        description=data.description,
+        created_at=data.created_at,
+        is_active=data.is_active,
+    )
+    session.add(new_hardware)
+    session.commit()
+    session.refresh(new_hardware)
+    return await fetch_hardware_details(new_hardware.id, session)
+
+
+async def update_hardware(hardware_id, data, session):
+    hardware = session.query(Hardware).filter(Hardware.id == hardware_id).first()
+    if not hardware:
+        raise HTTPException(status_code=404, detail="Hardware not found.")
+
+    hardware.devicetype_id = data.devicetype_id
+    hardware.version = data.version
+    hardware.name = data.name
+    hardware.description = data.description
+    hardware.created_at = data.created_at
+    hardware.is_active = data.is_active
+
+    session.commit()
+    return await fetch_hardware_details(hardware.id, session)
