@@ -19,15 +19,14 @@ async def fetch_hardware_details(hardware_id, session):
         version=hardware.version,
         name=hardware.name,
         description=hardware.description,
-        created_at=hardware.created_at,
         is_active=hardware.is_active,
-        error=_error,
+        created_at=hardware.created_at,
     )
 
     return my_hardware
 
 
-async def fetch_hardwares(session):
+async def fetch_hardware(session):
     hardwares = session.query(Hardware).order_by(Hardware.created_at.desc()).all()
 
     my_hardwares = []
@@ -38,8 +37,8 @@ async def fetch_hardwares(session):
             version=hardware.version,
             name=hardware.name,
             description=hardware.description,
-            created_at=hardware.created_at,
             is_active=hardware.is_active,
+            created_at=hardware.created_at,
         )
         my_hardwares.append(my_hardware)
 
@@ -69,7 +68,6 @@ async def insert_hardware(data, session):
         version=data.version,
         name=data.name,
         description=data.description,
-        created_at=data.created_at,
         is_active=data.is_active,
     )
     session.add(new_hardware)
@@ -87,7 +85,6 @@ async def update_hardware(hardware_id, data, session):
     hardware.version = data.version
     hardware.name = data.name
     hardware.description = data.description
-    hardware.created_at = data.created_at
     hardware.is_active = data.is_active
 
     session.commit()

@@ -19,6 +19,8 @@ from src.fastapi_app.routes import (
     copilot,
     device,
     devicetype,
+    firmware,
+    hardware,
     spotprice,
     tarif,
     tax,
@@ -50,6 +52,8 @@ def create_application():
     application.include_router(devicetype.devicetype_router)
     application.include_router(copilot.copilot_router)
     application.include_router(watermark.watermark_router)
+    application.include_router(firmware.firmware_router)
+    application.include_router(hardware.hardware_router)
 
     # Tillad CORS for Vue-app
     origins = [

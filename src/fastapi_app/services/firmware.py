@@ -21,7 +21,6 @@ async def fetch_firmware_details(firmware_id, session):
         repo_url=firmware.repo_url,
         is_active=firmware.is_active,
         created_at=firmware.created_at,
-        error=_error,
     )
 
     return my_firmware
@@ -70,7 +69,6 @@ async def insert_firmware(data, session):
         filename=data.filename,
         repo_url=data.repo_url,
         is_active=data.is_active,
-        created_at=data.created_at,
     )
     session.add(new_firmware)
     session.commit()
@@ -88,7 +86,6 @@ async def update_firmware(firmware_id, data, session):
     firmware.filename = data.filename
     firmware.repo_url = data.repo_url
     firmware.is_active = data.is_active
-    firmware.created_at = data.created_at
 
     session.commit()
     return await fetch_firmware_details(firmware.id, session)
