@@ -1,11 +1,10 @@
-from datetime import date
-from typing import Optional
+from datetime import datetime
+from typing import Union
 
 from src.fastapi_app.schemas.base import BaseSchema
 
 
 class DeviceTypeSchema(BaseSchema):
     name: str
-    hw_version: Optional[str] = None
-    sw_version: Optional[str] = None
-    sw_date: Optional[date] = None
+    description: Union[str, None] = None
+    created_at: Union[str, None, datetime] = None

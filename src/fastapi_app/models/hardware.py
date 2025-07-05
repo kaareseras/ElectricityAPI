@@ -1,6 +1,7 @@
 # Description: Tax model for database table creation.
-from sqlalchemy import Boolean, Date, ForeignKey, Integer, String
+from sqlalchemy import Boolean, ForeignKey, Integer, String, func
 from sqlalchemy.orm import mapped_column, relationship
+from sqlmodel import DateTime
 
 from src.fastapi_app.config.database import Base
 
@@ -13,7 +14,7 @@ class Hardware(Base):
     version = mapped_column(String(50), nullable=False)
     name = mapped_column(String(100), nullable=False)
     description = mapped_column(String(500), nullable=True)
-    created_at = mapped_column(Date, nullable=False)
+    created_at = mapped_column(DateTime, nullable=False, server_default=func.now())
     is_active = mapped_column(Boolean, nullable=False)
 
     devicetype = relationship("DeviceType", back_populates="hardwares")

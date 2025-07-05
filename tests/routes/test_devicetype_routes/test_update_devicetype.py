@@ -17,9 +17,7 @@ def test_update_devicetype(client, devicetype, admin_user, test_session):
     updated_devicetype = {
         "id": devicetype.id,
         "name": "Smart Meter X",
-        "hw_version": "HW-2.0",
-        "sw_version": "SW-3.1",
-        "sw_date": "2024-06-01T00:00:00",
+        "description": "A smart meter device type",
     }
 
     response = client.put(f"/devicetype/{devicetype.id}", headers=headers, json=updated_devicetype)
@@ -27,9 +25,7 @@ def test_update_devicetype(client, devicetype, admin_user, test_session):
     assert response.status_code == 200
     assert response.json()["id"] == updated_devicetype["id"]
     assert response.json()["name"] == updated_devicetype["name"]
-    assert response.json()["hw_version"] == updated_devicetype["hw_version"]
-    assert response.json()["sw_version"] == updated_devicetype["sw_version"]
-    assert response.json()["sw_date"] == updated_devicetype["sw_date"]
+    assert response.json()["description"] == updated_devicetype["description"]
 
 
 def test_update_devicetype_not_admin(client, devicetype, user, test_session):
@@ -39,9 +35,7 @@ def test_update_devicetype_not_admin(client, devicetype, user, test_session):
     updated_devicetype = {
         "id": devicetype.id,
         "name": "Smart Meter X",
-        "hw_version": "HW-2.0",
-        "sw_version": "SW-3.1",
-        "sw_date": "2024-06-01T00:00:00",
+        "description": "A smart meter device type",
     }
 
     response = client.put(f"/devicetype/{devicetype.id}", headers=headers, json=updated_devicetype)
@@ -61,9 +55,7 @@ def test_update_devicetype_with_missing_data(client, devicetype, admin_user, tes
     updated_devicetype = {
         "id": devicetype.id,
         # "name": "Smart Meter X",  # Missing required field
-        "hw_version": "HW-2.0",
-        "sw_version": "SW-3.1",
-        "sw_date": "2024-06-01",
+        "description": "A smart meter device type",
     }
 
     response = client.put(f"/devicetype/{devicetype.id}", headers=headers, json=updated_devicetype)

@@ -16,10 +16,7 @@ async def fetch_devicetype_details(device_type_id, session):
     my_devicetype = DeviceTypeResponse(
         id=devicetype.id,
         name=devicetype.name,
-        hw_version=devicetype.hw_version,
-        sw_version=devicetype.sw_version,
-        sw_date=devicetype.sw_date,
-        error=_error,
+        description=devicetype.description,
     )
 
     return my_devicetype
@@ -34,10 +31,7 @@ async def fetch_devicetype_by_name(name, session):
     my_devicetype = DeviceTypeResponse(
         id=devicetype.id,
         name=devicetype.name,
-        hw_version=devicetype.hw_version,
-        sw_version=devicetype.sw_version,
-        sw_date=devicetype.sw_date,
-        error=_error,
+        description=devicetype.description,
     )
 
     return my_devicetype
@@ -54,10 +48,7 @@ async def fetch_devicetypes(session):
         my_devicetype = DeviceTypeResponse(
             id=devicetype.id,
             name=devicetype.name,
-            hw_version=devicetype.hw_version,
-            sw_version=devicetype.sw_version,
-            sw_date=devicetype.sw_date,
-            error=_error,
+            description=devicetype.description,
         )
         my_devicetypes.append(my_devicetype)
 
@@ -80,9 +71,7 @@ async def insert_devicetype(data, session):
 
     new_devicetype = DeviceType(
         name=data.name,
-        hw_version=data.hw_version,
-        sw_version=data.sw_version,
-        sw_date=data.sw_date,
+        description=data.description,
     )
     session.add(new_devicetype)
     session.commit()
@@ -96,9 +85,7 @@ async def update_devicetype(device_type_id, data, session):
         raise HTTPException(status_code=404, detail="DeviceType not found.")
 
     devicetype.name = data.name
-    devicetype.hw_version = data.hw_version
-    devicetype.sw_version = data.sw_version
-    devicetype.sw_date = data.sw_date
+    devicetype.description = data.description
 
     session.commit()
     return await fetch_devicetype_details(devicetype.id, session)
