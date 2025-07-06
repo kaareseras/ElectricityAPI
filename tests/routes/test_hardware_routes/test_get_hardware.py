@@ -30,6 +30,28 @@ def test_fetch_hardware_not_admin(client, hardware, user, test_session):
 
     assert response.status_code == 403
 
+    # Test for fetching hardware by DeviceType ID
+
+
+def test_fetch_hardware_by_device(client, devicetype, hardware, firmware, admin_user, test_session):
+    data = _generate_tokens(admin_user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    response = client.get(f"/hardware/by-devicetype/{devicetype.id}", headers=headers)
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["id"] == hardware.id
+
+
+def test_fetch_hardware_by_device_not_admin(client, devicetype, hardware, firmware, user, test_session):
+    data = _generate_tokens(user, test_session)
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+
+    response = client.get(f"/hardware/by-devicetype/{devicetype.id}", headers=headers)
+
+    assert response.status_code == 403
+
 
 # Test for fetching all hardware
 
