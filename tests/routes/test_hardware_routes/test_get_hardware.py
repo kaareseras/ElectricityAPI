@@ -1,10 +1,17 @@
 """
 Tests for hardware routes.
-Functions:
-1. Test fetching a hardware by ID.
-2. Test fetching all hardware.
-3. Test fetching hardware with an invalid ID.
-4. Test fetching hardware without being logged in.
+
+Test cases:
+1. Fetch hardware by ID as admin (should succeed).
+2. Fetch hardware by ID as non-admin (should fail with 403).
+3. Fetch hardware by DeviceType ID as admin (should succeed).
+4. Fetch hardware by DeviceType ID as non-admin (should fail with 403).
+5. Fetch all hardware as admin (should succeed).
+6. Fetch all hardware as non-admin (should fail with 403).
+7. Fetch all hardware when no hardware in DB as non-admin (should fail with 403).
+8. Fetch hardware with invalid ID as non-admin (should fail with 403).
+9. Fetch hardware by ID without authentication (should fail with 401).
+10. Fetch all hardware without authentication (should fail with 401).
 """
 
 from src.fastapi_app.services.user import _generate_tokens
