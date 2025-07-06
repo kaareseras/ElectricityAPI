@@ -22,12 +22,14 @@ async def get_device_type_by_id(pk: int, session: Session = Depends(get_db_sessi
 @devicetype_router.get(
     "", status_code=status.HTTP_200_OK, response_model=list[DeviceTypeResponse], operation_id="get_all_device_types"
 )
-async def get_devicetypes(session: Session = Depends(get_db_session)):
+async def get_devicetypes(session: Session = Depends(get_db_session), user=Depends(get_current_admin)):
     return await devicetype.fetch_devicetypes(session)
 
 
 @devicetype_router.get("/with_hw_fw", status_code=status.HTTP_200_OK, response_model=list[DeviceTypeListResponse])
-async def fetch_devicetypes_with_active_firmware_and_hardware(session: Session = Depends(get_db_session)):
+async def fetch_devicetypes_with_active_firmware_and_hardware(
+    session: Session = Depends(get_db_session), user=Depends(get_current_admin)
+):
     return await devicetype.fetch_devicetypes_with_active_firmware_and_hardware(session)
 
 
