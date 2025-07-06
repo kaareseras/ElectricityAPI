@@ -1,8 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from src.fastapi_app.config.database import get_db_session
-from src.fastapi_app.config.security import get_current_admin, get_current_user
+from src.fastapi_app.config.security import get_current_admin
 from src.fastapi_app.responses.firmware import FirmwareResponse
 from src.fastapi_app.schemas.firmware import FirmwareSchema
 from src.fastapi_app.services import firmware
@@ -15,8 +17,15 @@ firmware_router = APIRouter(
 
 
 @firmware_router.get("/{pk}", status_code=status.HTTP_200_OK, response_model=FirmwareResponse)
-async def get_firmware_by_id(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
+async def get_firmware_by_id(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_admin)):
     return await firmware.fetch_firmware_details(pk, session)
+
+
+@firmware_router.get("/by-devicetype/{pk}", status_code=status.HTTP_200_OK, response_model=List[FirmwareResponse])
+async def get_firmware_by_devicetype(
+    pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_admin)
+):
+    return await firmware.fetch_firmware_by_devicetype(pk, session)
 
 
 @firmware_router.get(

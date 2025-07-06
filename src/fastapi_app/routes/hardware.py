@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,13 @@ hardware_router = APIRouter(
 @hardware_router.get("/{pk}", status_code=status.HTTP_200_OK, response_model=HardwareResponse)
 async def get_hardware_by_id(pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_user)):
     return await hardware.fetch_hardware_details(pk, session)
+
+
+@hardware_router.get("/by-devicetype/{pk}", status_code=status.HTTP_200_OK, response_model=List[HardwareResponse])
+async def get_hardware_by_devicetype(
+    pk: int, session: Session = Depends(get_db_session), user=Depends(get_current_admin)
+):
+    return await hardware.fetch_hardware_by_devicetype(pk, session)
 
 
 @hardware_router.get(

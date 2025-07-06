@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 
 from src.fastapi_app.config.config import get_settings
@@ -26,23 +28,43 @@ async def fetch_firmware_details(firmware_id, session):
     return my_firmware
 
 
+async def fetch_firmware_by_devicetype(devicetype_id, session):
+    firmwares = (
+        session.query(Firmware)
+        .filter(Firmware.devicetype_id == devicetype_id)
+        .order_by(Firmware.created_at.desc())
+        .all()
+    )
+
+    return [
+        FirmwareResponse(
+            id=fw.id,
+            devicetype_id=fw.devicetype_id,
+            version=fw.version,
+            filename=fw.filename,
+            repo_url=fw.repo_url,
+            is_active=fw.is_active,
+            created_at=fw.created_at,
+        ).model_dump()
+        for fw in firmwares
+    ]
+
+
 async def fetch_firmwares(session):
     firmwares = session.query(Firmware).order_by(Firmware.created_at.desc()).all()
 
-    my_firmwares = []
-    for firmware in firmwares:
-        my_firmware = FirmwareResponse(
-            id=firmware.id,
-            devicetype_id=firmware.devicetype_id,
-            version=firmware.version,
-            filename=firmware.filename,
-            repo_url=firmware.repo_url,
-            is_active=firmware.is_active,
-            created_at=firmware.created_at,
-        )
-        my_firmwares.append(my_firmware)
-
-    return my_firmwares
+    return [
+        FirmwareResponse(
+            id=fw.id,
+            devicetype_id=fw.devicetype_id,
+            version=fw.version,
+            filename=fw.filename,
+            repo_url=fw.repo_url,
+            is_active=fw.is_active,
+            created_at=fw.created_at,
+        ).model_dump()
+        for fw in firmwares
+    ]
 
 
 async def delete_firmware(pk, session):
@@ -69,6 +91,7 @@ async def insert_firmware(data, session):
         filename=data.filename,
         repo_url=data.repo_url,
         is_active=data.is_active,
+        created_at=datetime.now(timezone.utc),
     )
     session.add(new_firmware)
     session.commit()

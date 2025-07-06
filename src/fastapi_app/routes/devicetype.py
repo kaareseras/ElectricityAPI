@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from src.fastapi_app.config.database import get_db_session
 from src.fastapi_app.config.security import get_current_admin, get_current_user
-from src.fastapi_app.responses.devicetype import DeviceTypeResponse
+from src.fastapi_app.responses.devicetype import DeviceTypeListResponse, DeviceTypeResponse
 from src.fastapi_app.schemas.devicetype import DeviceTypeSchema
 from src.fastapi_app.services import devicetype
 
@@ -24,6 +24,11 @@ async def get_device_type_by_id(pk: int, session: Session = Depends(get_db_sessi
 )
 async def get_devicetypes(session: Session = Depends(get_db_session)):
     return await devicetype.fetch_devicetypes(session)
+
+
+@devicetype_router.get("/with_hw_fw", status_code=status.HTTP_200_OK, response_model=list[DeviceTypeListResponse])
+async def fetch_devicetypes_with_active_firmware_and_hardware(session: Session = Depends(get_db_session)):
+    return await devicetype.fetch_devicetypes_with_active_firmware_and_hardware(session)
 
 
 @devicetype_router.post("", status_code=status.HTTP_201_CREATED, response_model=DeviceTypeResponse)

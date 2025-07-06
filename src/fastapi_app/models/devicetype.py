@@ -15,5 +15,5 @@ class DeviceType(Base):
     created_at = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     devices = relationship("Device", back_populates="devicetype")
-    firmwares = relationship("Firmware", back_populates="devicetype")
-    hardwares = relationship("Hardware", back_populates="devicetype")
+    firmwares = relationship("Firmware", back_populates="devicetype", cascade="all, delete-orphan")
+    hardwares = relationship("Hardware", back_populates="devicetype", cascade="all, delete-orphan")

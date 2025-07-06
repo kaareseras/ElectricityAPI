@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 
 from src.fastapi_app.config.config import get_settings
@@ -24,6 +26,30 @@ async def fetch_hardware_details(hardware_id, session):
     )
 
     return my_hardware
+
+
+async def fetch_hardware_by_devicetype(devicetype_id, session):
+    hardwares = (
+        session.query(Hardware)
+        .filter(Hardware.devicetype_id == devicetype_id)
+        .order_by(Hardware.created_at.desc())
+        .all()
+    )
+
+    my_hardwares = []
+    for hardware in hardwares:
+        my_hardware = HardwareResponse(
+            id=hardware.id,
+            devicetype_id=hardware.devicetype_id,
+            version=hardware.version,
+            name=hardware.name,
+            description=hardware.description,
+            is_active=hardware.is_active,
+            created_at=hardware.created_at,
+        )
+        my_hardwares.append(my_hardware)
+
+    return my_hardwares
 
 
 async def fetch_hardware(session):
@@ -69,6 +95,7 @@ async def insert_hardware(data, session):
         name=data.name,
         description=data.description,
         is_active=data.is_active,
+        created_at=datetime.now(timezone.utc),
     )
     session.add(new_hardware)
     session.commit()

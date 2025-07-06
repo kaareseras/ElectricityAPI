@@ -1,8 +1,14 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
+from sqlalchemy import and_
+from sqlalchemy.orm import contains_eager
 
 from src.fastapi_app.config.config import get_settings
 from src.fastapi_app.models.devicetype import DeviceType
-from src.fastapi_app.responses.devicetype import DeviceTypeResponse
+from src.fastapi_app.models.firmware import Firmware
+from src.fastapi_app.models.hardware import Hardware
+from src.fastapi_app.responses.devicetype import DeviceTypeListResponse, DeviceTypeResponse
 
 settings = get_settings()
 
@@ -22,26 +28,41 @@ async def fetch_devicetype_details(device_type_id, session):
     return my_devicetype
 
 
-async def fetch_devicetype_by_name(name, session):
-    devicetype = session.query(DeviceType).filter(DeviceType.name == name).first()
-    _error = ""
-    if not devicetype:
-        raise HTTPException(status_code=404, detail="DeviceType not found.")
-
-    my_devicetype = DeviceTypeResponse(
-        id=devicetype.id,
-        name=devicetype.name,
-        description=devicetype.description,
+async def fetch_devicetypes_with_active_firmware_and_hardware(session):
+    devicetypes = (
+        session.query(DeviceType)
+        .outerjoin(Firmware, and_(Firmware.devicetype_id == DeviceType.id, Firmware.is_active))
+        .outerjoin(Hardware, and_(Hardware.devicetype_id == DeviceType.id, Hardware.is_active))
+        .options(
+            contains_eager(DeviceType.firmwares),
+            contains_eager(DeviceType.hardwares),
+        )
+        .order_by(DeviceType.name)
+        .all()
     )
 
-    return my_devicetype
+    my_devicetypes = []
+
+    for devicetype in devicetypes:
+        firmware = devicetype.firmwares[0] if devicetype.firmwares else None
+        hardware = devicetype.hardwares[0] if devicetype.hardwares else None
+
+        my_devicetype = DeviceTypeListResponse(
+            id=devicetype.id,
+            name=devicetype.name,
+            description=devicetype.description,
+            created_at=devicetype.created_at,
+            fw_version=firmware.version if firmware else None,
+            fw_date=firmware.created_at if firmware else None,  # eller .release_date hvis det felt findes
+            hw_version=hardware.version if hardware else None,
+        )
+        my_devicetypes.append(my_devicetype)
+
+    return my_devicetypes
 
 
 async def fetch_devicetypes(session):
     devicetypes = session.query(DeviceType).order_by(DeviceType.name).all()
-    _error = ""
-    if not devicetypes:
-        raise HTTPException(status_code=404, detail="DeviceTypes not found.")
 
     my_devicetypes = []
     for devicetype in devicetypes:
@@ -69,10 +90,7 @@ async def insert_devicetype(data, session):
     if existing_devicetype:
         raise HTTPException(status_code=400, detail="DeviceType with this name already exists.")
 
-    new_devicetype = DeviceType(
-        name=data.name,
-        description=data.description,
-    )
+    new_devicetype = DeviceType(name=data.name, description=data.description, created_at=datetime.now(timezone.utc))
     session.add(new_devicetype)
     session.commit()
     session.refresh(new_devicetype)
