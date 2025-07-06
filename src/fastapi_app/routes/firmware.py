@@ -28,10 +28,8 @@ async def get_firmware_by_devicetype(
     return await firmware.fetch_firmware_by_devicetype(pk, session)
 
 
-@firmware_router.get(
-    "", status_code=status.HTTP_200_OK, response_model=list[FirmwareResponse], operation_id="get_all_firmwares"
-)
-async def get_firmwares(session: Session = Depends(get_db_session)):
+@firmware_router.get("", status_code=status.HTTP_200_OK, response_model=list[FirmwareResponse])
+async def get_firmwares(session: Session = Depends(get_db_session), user=Depends(get_current_admin)):
     return await firmware.fetch_firmwares(session)
 
 
