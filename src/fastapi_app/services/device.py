@@ -313,8 +313,6 @@ async def fetch_device_dayprice(uuid: str, qdate: Date, session):
         + df["Retail_markup"]
     ).round(3)
 
-    print(df)
-
     # Find max/min for flagging
     max_price = df["TotalPrice"].max()
     min_price = df["TotalPrice"].min()

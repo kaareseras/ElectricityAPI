@@ -23,3 +23,12 @@ class ChargeownerListResponse(BaseResponse):
     chargetype: str
     chargetypecode: str
     is_active: bool
+
+
+class ChargeownerLatestCharge(BaseResponse):
+    compagny: str
+    chargetype: str
+    chargetypecode: str
+    glnnumber: str
+    valid_from: Union[None, datetime] = None
+    valid_to: Union[None, datetime] = None

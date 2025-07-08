@@ -27,6 +27,11 @@ logconfig_dict = {
     },
     "loggers": {
         "root": {"level": "INFO", "handlers": ["default"]},
+        "app": {
+            "level": "INFO",
+            "handlers": ["default"],
+            "propagate": False,
+        },
         "uvicorn.error": {
             "level": "INFO",
             "handlers": ["default"],
@@ -45,6 +50,7 @@ class MyUvicornWorker(UvicornWorker):
     CONFIG_KWARGS = {
         "loop": "asyncio",
         "http": "auto",
-        "lifespan": "off",
+        "lifespan": "on",  # Enable lifespan events for proper startup/shutdown
         "log_config": logconfig_dict,
+        "timeout_keep_alive": 5,  # Reduced keep-alive timeout
     }

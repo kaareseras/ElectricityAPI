@@ -1,4 +1,3 @@
 Enable usernames with ÆØÅ chars
-Make email not case sensitive in login
 Make all endpoints depend on admin instead of user
-Add edit functionality to Charge, Tax and Apotprice
+Add edit functionality to Charge, Tax and Spotprice
